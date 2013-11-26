@@ -31,7 +31,7 @@
 ;; desired.  And put the following expression into your ~/.emacs.
 ;;
 ;; (require 'helm-hatena-bookmark)
-;; (setq helm-hatena-bookmark-samewindow t)
+;; (setq helm-hatena-bookmark-full-frame t)
 ;;
 ;; And, you should execute `helm-hatena-bookmark-get-dump to reflesh dump file.
 
@@ -45,7 +45,7 @@
 (defvar helm-hatena-bookmark-file "~/.hatenabookmark")
 (defvar helm-hatena-bookmark-candidate-number-limit 9999)
 (defvar helm-hatena-bookmark-requires-pattern 3)
-(defvar helm-hatena-bookmark-samewindow helm-samewindow)
+(defvar helm-hatena-bookmark-full-frame helm-full-frame)
 
 (defun helm-hatena-bookmark-get-dump ()
   "Get Hatena::Bookmark dump file."
@@ -115,7 +115,7 @@
 (defun helm-hatena-bookmark ()
   "Search Hatena::Bookmark using `helm'."
   (interactive)
-  (let ((helm-samewindow helm-hatena-bookmark-samewindow))
+  (let ((helm-full-frame helm-hatena-bookmark-full-frame))
     (unless (file-exists-p helm-hatena-bookmark-file)
       (helm-hatena-bookmark-get-dump))
     (helm
