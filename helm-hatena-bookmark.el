@@ -41,7 +41,6 @@
 (require 'helm)
 (require 'url)
 (require 'xml)
-(require 'sha1)
 
 (defvar helm-hatena-bookmark-file "~/.hatenabookmark")
 (defvar helm-hatena-bookmark-candidate-number-limit 9999)
@@ -61,7 +60,7 @@
        (entry-list nil)
        (id (read-string "Hatena ID: "))
        (password (read-passwd "Password: ")))
-    (setq x-wsse (concat "UsernameToken Username=\"" id "\", PasswordDigest=\"" (base64-encode-string (sha1-binary (concat nonce created password))) "\", Nonce=\"" (base64-encode-string nonce) "\", Created=\"" created "\""))
+    (setq x-wsse (concat "UsernameToken Username=\"" id "\", PasswordDigest=\"" (base64-encode-string (sha1 (concat nonce created password) nil nil 'binary)) "\", Nonce=\"" (base64-encode-string nonce) "\", Created=\"" created "\""))
     (setq x-wsse-list (cons "X-WSSE" x-wsse))
     (setq url-request-extra-headers (list x-wsse-list))
     (switch-to-buffer (url-retrieve-synchronously url))
