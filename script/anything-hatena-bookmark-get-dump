@@ -1,0 +1,47 @@
+#!/bin/sh
+
+CMDNAME=`basename $0`
+
+: ${BOOKMARK_FILE:=$HOME/.hatenabookmark}
+: ${LIMIT:=5000}
+: ${TMP_FILE:=${BOOKMARK_FILE}.tmp}
+: ${SED:=sed}
+
+error() {
+    echo "Usage: $CMDNAME HATENA_ID" 1>&2
+    exit 1
+}
+
+cleanup() {
+    rm -f $TMP_FILE
+    exit $1
+}
+
+bookmark_load() {
+    _URL="http://b.hatena.ne.jp/${HATENA_ID}/search.data?offset=${1}&limit=${LIMIT}"
+    wget -q -O - --user-agent=wget "$_URL" | \
+        $SED -n \
+        'N; N; s/\(.*\)\n\(\[.*\]\)\?\(.*\)\n\(http.*\)/\2 \1 [summary:\3][href:\4]/p' \
+        >> $TMP_FILE
+}
+
+if [ $# != 1 ]; then
+    error
+fi
+
+HATENA_ID=$1
+_OFFSET=0
+
+trap 'cleanup 1' 1 2 3 15
+
+bookmark_load $_OFFSET || exit 1
+_LINES=$(expr $(wc -l < $TMP_FILE | sed "s/ //") + 1)
+
+# 最高1万件まで取得
+if [ $_LINES -ge $LIMIT ]
+then
+    OFFSET=$(expr $_OFFSET + $LIMIT)
+    bookmark_load $_OFFSET || exit 1
+fi
+
+mv -f $TMP_FILE $BOOKMARK_FILE

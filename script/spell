@@ -1,0 +1,2 @@
+#!/bin/sh
+cat "$@" | /opt/local/bin/aspell list
