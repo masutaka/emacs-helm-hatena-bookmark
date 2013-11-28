@@ -47,6 +47,7 @@
 (defvar helm-hatena-bookmark-requires-pattern 3)
 (defvar helm-hatena-bookmark-full-frame helm-full-frame)
 
+;;;###autoload
 (defun helm-hatena-bookmark-get-dump ()
   "Get Hatena::Bookmark dump file."
   (interactive)
@@ -112,6 +113,7 @@
                          (string-match "\\[summary:\\(.+\\)\\]\\[" candidate)
                          (message (match-string 1 candidate)))))))
 
+;;;###autoload
 (defun helm-hatena-bookmark ()
   "Search Hatena::Bookmark using `helm'."
   (interactive)
