@@ -1,7 +1,6 @@
 ;;; helm-hatena-bookmark.el --- Hatena::Bookmark helm.el interface
-;; -*- Mode: Emacs-Lisp -*-
 
-;; Copyright (C) 2013 by Takashi Masuda
+;; Copyright (C) 2015 by Takashi Masuda
 
 ;; Author: Takashi Masuda <masutaka.net@gmail.com>
 ;; URL: https://github.com/masutaka/emacs-helm-hatena-bookmark
@@ -125,5 +124,4 @@
 
 (provide 'helm-hatena-bookmark)
 
-;;; end
 ;;; helm-hatena-bookmark.el ends here
