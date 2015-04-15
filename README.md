@@ -14,7 +14,7 @@
 
 * A function to get dump your Hatena::Bookmark to `helm-hatena-bookmark-file`.
 
-### `helm-c-source-hatena-bookmark`
+### `helm-hatena-bookmark--source`
 
 * A source for your Hatena::Bookmark.
 

@@ -79,7 +79,7 @@
     (write-file helm-hatena-bookmark-file)
     (kill-buffer (current-buffer))))
 
-(defvar helm-c-source-hatena-bookmark
+(defvar helm-hatena-bookmark--source
   `((name . "Hatena::Bookmark")
     (init
      . (lambda ()
@@ -99,7 +99,8 @@
                      (message (match-string 1 candidate))))
      ("Show Summary" . (lambda (candidate)
                          (string-match "\\[summary:\\(.+\\)\\]\\[" candidate)
-                         (message (match-string 1 candidate)))))))
+                         (message (match-string 1 candidate))))))
+  "Helm source for Hatena::Bookmark")
 
 ;;;###autoload
 (defun helm-hatena-bookmark ()
@@ -108,7 +109,7 @@
   (let ((helm-full-frame helm-hatena-bookmark-full-frame))
     (unless (file-exists-p helm-hatena-bookmark-file)
       (helm-hatena-bookmark-get-dump))
-    (helm :sources helm-c-source-hatena-bookmark
+    (helm :sources helm-hatena-bookmark--source
 	  :prompt "Find Bookmark: ")))
 
 (provide 'helm-hatena-bookmark)
