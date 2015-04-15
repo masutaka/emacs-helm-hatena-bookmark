@@ -79,6 +79,7 @@
     (kill-buffer (current-buffer))))
 
 (defun helm-hatena-bookmark--load ()
+  "Load `helm-hatena-bookmark-file'."
   (with-current-buffer (helm-candidate-buffer 'global)
     (let ((coding-system-for-read 'utf-8))
       (insert-file-contents helm-hatena-bookmark-file))))
@@ -89,14 +90,20 @@
     ("Show Summary" . helm-hatena-bookmark--show-summary)))
 
 (defun helm-hatena-bookmark--browse-url (candidate)
+  "Action for Browse URL.
+Argument CANDIDATE a line string of a bookmark."
   (string-match "\\[href:\\(.+\\)\\]$" candidate)
   (browse-url (match-string 1 candidate)))
 
 (defun helm-hatena-bookmark--show-url (candidate)
+  "Action for Show URL.
+Argument CANDIDATE a line string of a bookmark."
   (string-match "\\[href:\\(.+\\)\\]$" candidate)
   (message (match-string 1 candidate)))
 
-(defun helm-hatena-bookmark--show-summary(candidate)
+(defun helm-hatena-bookmark--show-summary (candidate)
+  "Action for Show Summary.
+Argument CANDIDATE a line string of a bookmark."
   (string-match "\\[summary:\\(.+\\)\\]\\[" candidate)
   (message (match-string 1 candidate)))
 
@@ -107,7 +114,7 @@
     (candidate-number-limit . ,helm-hatena-bookmark-candidate-number-limit)
     (multiline)
     (action . ,helm-hatena-bookmark--action))
-  "Helm source for Hatena::Bookmark")
+  "Helm source for Hatena::Bookmark.")
 
 ;;;###autoload
 (defun helm-hatena-bookmark ()
