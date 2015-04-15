@@ -79,27 +79,37 @@
     (write-file helm-hatena-bookmark-file)
     (kill-buffer (current-buffer))))
 
-(defvar helm-c-source-hatena-bookmark
+(defun helm-hatena-bookmark--load ()
+  (with-current-buffer (helm-candidate-buffer 'global)
+    (let ((coding-system-for-read 'utf-8))
+      (insert-file-contents helm-hatena-bookmark-file))))
+
+(defvar helm-hatena-bookmark--action
+  '(("Browse URL" . helm-hatena-bookmark--browse-url)
+    ("Show URL" . helm-hatena-bookmark--show-url)
+    ("Show Summary" . helm-hatena-bookmark--show-summary)))
+
+(defun helm-hatena-bookmark--browse-url (candidate)
+  (string-match "\\[href:\\(.+\\)\\]$" candidate)
+  (browse-url (match-string 1 candidate)))
+
+(defun helm-hatena-bookmark--show-url (candidate)
+  (string-match "\\[href:\\(.+\\)\\]$" candidate)
+  (message (match-string 1 candidate)))
+
+(defun helm-hatena-bookmark--show-summary(candidate)
+  (string-match "\\[summary:\\(.+\\)\\]\\[" candidate)
+  (message (match-string 1 candidate)))
+
+(defvar helm-hatena-bookmark--source
   `((name . "Hatena::Bookmark")
-    (init
-     . (lambda ()
-           (with-current-buffer (helm-candidate-buffer 'global)
-             (let ((coding-system-for-read 'utf-8))
-               (insert-file-contents helm-hatena-bookmark-file)))))
+    (init . helm-hatena-bookmark--load)
     (candidates-in-buffer)
     (candidate-number-limit . ,helm-hatena-bookmark-candidate-number-limit)
     (requires-pattern . ,helm-hatena-bookmark-requires-pattern)
     (multiline)
-    (action
-     ("Browse URL" . (lambda (candidate)
-                       (string-match "\\[href:\\(.+\\)\\]$" candidate)
-                       (browse-url (match-string 1 candidate))))
-     ("Show URL" . (lambda (candidate)
-                     (string-match "\\[href:\\(.+\\)\\]$" candidate)
-                     (message (match-string 1 candidate))))
-     ("Show Summary" . (lambda (candidate)
-                         (string-match "\\[summary:\\(.+\\)\\]\\[" candidate)
-                         (message (match-string 1 candidate)))))))
+    (action . ,helm-hatena-bookmark--action))
+  "Helm source for Hatena::Bookmark")
 
 ;;;###autoload
 (defun helm-hatena-bookmark ()
@@ -108,8 +118,8 @@
   (let ((helm-full-frame helm-hatena-bookmark-full-frame))
     (unless (file-exists-p helm-hatena-bookmark-file)
       (helm-hatena-bookmark-get-dump))
-    (helm
-     '(helm-c-source-hatena-bookmark) nil "Find Bookmark: " nil nil)))
+    (helm :sources helm-hatena-bookmark--source
+	  :prompt "Find Bookmark: ")))
 
 (provide 'helm-hatena-bookmark)
 
