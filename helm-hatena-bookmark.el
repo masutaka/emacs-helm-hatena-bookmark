@@ -32,7 +32,6 @@
 
 (defvar helm-hatena-bookmark-file "~/.hatenabookmark")
 (defvar helm-hatena-bookmark-candidate-number-limit 9999)
-(defvar helm-hatena-bookmark-requires-pattern 3)
 (defvar helm-hatena-bookmark-full-frame helm-full-frame)
 
 ;;;###autoload
@@ -106,7 +105,6 @@
     (init . helm-hatena-bookmark--load)
     (candidates-in-buffer)
     (candidate-number-limit . ,helm-hatena-bookmark-candidate-number-limit)
-    (requires-pattern . ,helm-hatena-bookmark-requires-pattern)
     (multiline)
     (action . ,helm-hatena-bookmark--action))
   "Helm source for Hatena::Bookmark")
