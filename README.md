@@ -16,7 +16,7 @@
 
 ### `helm-hatena-bookmark--source`
 
-* A source for your Hatena::Bookmark.
+* A helm source for your Hatena::Bookmark.
 
 ## Acknowledgment
 
