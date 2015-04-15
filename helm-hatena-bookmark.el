@@ -108,8 +108,8 @@
   (let ((helm-full-frame helm-hatena-bookmark-full-frame))
     (unless (file-exists-p helm-hatena-bookmark-file)
       (helm-hatena-bookmark-get-dump))
-    (helm
-     '(helm-c-source-hatena-bookmark) nil "Find Bookmark: " nil nil)))
+    (helm :sources helm-c-source-hatena-bookmark
+	  :prompt "Find Bookmark: ")))
 
 (provide 'helm-hatena-bookmark)
 
