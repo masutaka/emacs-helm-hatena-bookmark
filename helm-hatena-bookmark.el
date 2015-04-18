@@ -1,4 +1,4 @@
-;;; helm-hatena-bookmark.el --- Hatena::Bookmark with helm interface
+;;; helm-hatena-bookmark.el --- Hatena::Bookmark with helm interface -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015 by Takashi Masuda
 
