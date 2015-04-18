@@ -57,42 +57,42 @@ DO NOT SET VALUE MANUALLY.")
 (defvar helm-hatena-bookmark:profile-start-time nil)
 (defvar helm-hatena-bookmark:debug-mode nil)
 
-(defun helm-hatena-bookmark--load ()
+(defun helm-hatena-bookmark:load ()
   "Load `helm-hatena-bookmark-file'."
   (with-current-buffer (helm-candidate-buffer 'global)
     (let ((coding-system-for-read 'utf-8))
       (insert-file-contents helm-hatena-bookmark-file))))
 
-(defvar helm-hatena-bookmark--action
-  '(("Browse URL" . helm-hatena-bookmark--browse-url)
-    ("Show URL" . helm-hatena-bookmark--show-url)
-    ("Show Summary" . helm-hatena-bookmark--show-summary)))
+(defvar helm-hatena-bookmark:action
+  '(("Browse URL" . helm-hatena-bookmark:browse-url)
+    ("Show URL" . helm-hatena-bookmark:show-url)
+    ("Show Summary" . helm-hatena-bookmark:show-summary)))
 
-(defun helm-hatena-bookmark--browse-url (candidate)
+(defun helm-hatena-bookmark:browse-url (candidate)
   "Action for Browse URL.
 Argument CANDIDATE a line string of a bookmark."
   (string-match "\\[href:\\(.+\\)\\]$" candidate)
   (browse-url (match-string 1 candidate)))
 
-(defun helm-hatena-bookmark--show-url (candidate)
+(defun helm-hatena-bookmark:show-url (candidate)
   "Action for Show URL.
 Argument CANDIDATE a line string of a bookmark."
   (string-match "\\[href:\\(.+\\)\\]$" candidate)
   (message (match-string 1 candidate)))
 
-(defun helm-hatena-bookmark--show-summary (candidate)
+(defun helm-hatena-bookmark:show-summary (candidate)
   "Action for Show Summary.
 Argument CANDIDATE a line string of a bookmark."
   (string-match "\\[summary:\\(.+\\)\\]\\[" candidate)
   (message (match-string 1 candidate)))
 
-(defvar helm-hatena-bookmark--source
+(defvar helm-hatena-bookmark:source
   `((name . "Hatena::Bookmark")
-    (init . helm-hatena-bookmark--load)
+    (init . helm-hatena-bookmark:load)
     (candidates-in-buffer)
     (candidate-number-limit . ,helm-hatena-bookmark-candidate-number-limit)
     (multiline)
-    (action . ,helm-hatena-bookmark--action))
+    (action . ,helm-hatena-bookmark:action))
   "Helm source for Hatena::Bookmark.")
 
 ;;;###autoload
@@ -102,7 +102,7 @@ Argument CANDIDATE a line string of a bookmark."
   (let ((helm-full-frame helm-hatena-bookmark-full-frame))
     (unless (file-exists-p helm-hatena-bookmark-file)
       (error (format "%s not found" helm-hatena-bookmark-file)))
-    (helm :sources helm-hatena-bookmark--source
+    (helm :sources helm-hatena-bookmark:source
 	  :prompt "Find Bookmark: ")))
 
 (defun helm-hatena-bookmark:find-sed-program ()
