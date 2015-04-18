@@ -106,23 +106,25 @@ Argument CANDIDATE a line string of a bookmark."
 	  :prompt "Find Bookmark: ")))
 
 (defun helm-hatena-bookmark:find-sed-program ()
-  "Returns an appropriate `sed' program pathname or error if not found."
+  "Return an appropriate `sed' program pathname or error if not found."
   (executable-find
    (cond
     ((eq system-type 'darwin)
      (unless (executable-find "gsed")
-       (error "helm-hatena-bookmark requires `gsed'. (ex. `$ brew install gnu-sed')"))
+       (error "Cannot find `gsed' helm-hatena-bookmark.el requires.  (example `$ brew install gnu-sed')"))
      "gsed")
     (t
      "sed"))))
 
 (defun helm-hatena-bookmark:get-url ()
+  "Return Hatena::Bookmark URL or error if `helm-hatena-bookmark:username' is nil."
   (unless helm-hatena-bookmark:username
-    (error "helm-hatena-bookmark:username is nil"))
+    (error "Variable `helm-hatena-bookmark:username' is nil"))
   (format "http://b.hatena.ne.jp/%s/search.data"
 	  helm-hatena-bookmark:username))
 
 (defun helm-hatena-bookmark:http-request ()
+  "Make a new HTTP request for create `helm-hatena-bookmark-file'."
   (let ((buffer-name helm-hatena-bookmark:http-buffer-name)
 	(proc-name "helm-hatena-bookmark")
 	(curl-args `("--silent" "--compressed" ,helm-hatena-bookmark:url))
@@ -138,6 +140,9 @@ Argument CANDIDATE a line string of a bookmark."
     (set-process-sentinel proc 'helm-hatena-bookmark:http-request-sentinel)))
 
 (defun helm-hatena-bookmark:http-request-sentinel (process event)
+  "Receive a response of `helm-hatena-bookmark:http-request'.
+Argument PROCESS is a http-request process.
+Argument EVENT is a string describing the type of event."
   (let ((buffer-name helm-hatena-bookmark:http-buffer-name))
     (with-current-buffer (get-buffer buffer-name)
       (let ((sed-args '("-n" "N; N; s/\\(.*\\)\\n\\(\\[.*\\]\\)\\?\\(.*\\)\\n\\(http.*\\)/\\2 \\1 [summary:\\3][href:\\4]/p")))
@@ -156,6 +161,7 @@ Argument CANDIDATE a line string of a bookmark."
 
 ;;;###autoload
 (defun helm-hatena-bookmark:initialize ()
+  "Initialize `helm-hatena-bookmark'."
   (setq helm-hatena-bookmark:url
 	(helm-hatena-bookmark:get-url))
   (setq helm-hatena-bookmark:sed-program
