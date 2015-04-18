@@ -10,10 +10,6 @@
 
 * A function to be able to select your Hatena::Bookmark.
 
-### `helm-hatena-bookmark-get-dump`
-
-* A function to get dump your Hatena::Bookmark to `helm-hatena-bookmark-file`.
-
 ### `helm-hatena-bookmark--source`
 
 * A helm source for your Hatena::Bookmark.

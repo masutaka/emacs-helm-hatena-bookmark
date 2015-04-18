@@ -25,58 +25,11 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
 (require 'helm)
-(require 'url)
-(require 'xml)
 
 (defvar helm-hatena-bookmark-file "~/.hatenabookmark")
 (defvar helm-hatena-bookmark-candidate-number-limit 9999)
 (defvar helm-hatena-bookmark-full-frame helm-full-frame)
-
-;;;###autoload
-(defun helm-hatena-bookmark-get-dump ()
-  "Get Hatena::Bookmark dump file."
-  (interactive)
-  (let
-      ((created (format-time-string "%Y-%m-%dT%TZ" (current-time)))
-       (nonce (sha1 (format-time-string "%Y-%m-%dT%T%z" (current-time))))
-       (url "http://b.hatena.ne.jp/dump")
-       (url-request-extra-headers nil)
-       (x-wsse "")
-       (x-wsse-list nil)
-       (entry-list nil)
-       (id (read-string "Hatena ID: "))
-       (password (read-passwd "Password: ")))
-    (setq x-wsse (concat "UsernameToken Username=\"" id "\", PasswordDigest=\"" (base64-encode-string (sha1 (concat nonce created password) nil nil 'binary)) "\", Nonce=\"" (base64-encode-string nonce) "\", Created=\"" created "\""))
-    (setq x-wsse-list (cons "X-WSSE" x-wsse))
-    (setq url-request-extra-headers (list x-wsse-list))
-    (switch-to-buffer (url-retrieve-synchronously url))
-    (goto-char (point-min))
-    (re-search-forward "^$" nil 'move)
-    (delete-region (point-min) (1+ (point)))
-    (goto-char (point-min))
-    (while (re-search-forward "\n" nil t)
-      (replace-match ""))
-    (goto-char (point-min))
-    (while (re-search-forward "> +<" nil t)
-      (replace-match "><"))
-    (setq entry-list (xml-get-children (car (xml-parse-region (point-min) (point-max))) 'entry))
-    (delete-region (point-min) (point-max))
-    (loop for elm in entry-list
-          do (insert
-              (concat
-               (apply 'concat (loop for elmelm in (xml-get-children elm 'dc:subject) collect (concat "[" (nth 2 elmelm) "]")))
-               " "
-               (let ((title (nth 2 (car (xml-get-children elm 'title)))))
-                 (while (string-match "[\n\t]" title)
-                     (setq title (replace-match "" nil nil title)))
-                 title)
-               (concat " [summary:" (nth 2 (car (xml-get-children elm 'summary))))
-               (concat "][href:" (xml-get-attribute (car (xml-get-children elm 'link)) 'href))
-               "]\n")))
-    (write-file helm-hatena-bookmark-file)
-    (kill-buffer (current-buffer))))
 
 (defun helm-hatena-bookmark--load ()
   "Load `helm-hatena-bookmark-file'."
@@ -122,7 +75,7 @@ Argument CANDIDATE a line string of a bookmark."
   (interactive)
   (let ((helm-full-frame helm-hatena-bookmark-full-frame))
     (unless (file-exists-p helm-hatena-bookmark-file)
-      (helm-hatena-bookmark-get-dump))
+      (error (format "%s not found" helm-hatena-bookmark-file)))
     (helm :sources helm-hatena-bookmark--source
 	  :prompt "Find Bookmark: ")))
 
