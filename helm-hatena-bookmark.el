@@ -1,4 +1,4 @@
-;;; helm-hatena-bookmark.el --- Hatena::Bookmark with helm interface
+;;; helm-hatena-bookmark.el --- Hatena::Bookmark with helm interface -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015 by Takashi Masuda
 
@@ -25,95 +25,83 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
 (require 'helm)
-(require 'url)
-(require 'xml)
+
+(defgroup helm-hatena-bookmark nil
+  "Settings for helm-hatena-bookmark."
+  :group 'helm)
+
+(defcustom helm-hatena-bookmark:username nil
+  "*A username of your Hatena account."
+  :type '(choice (const nil)
+		 string)
+  :group 'helm-hatena-bookmark)
+
+(defvar helm-hatena-bookmark:url nil
+  "Cache a result of `helm-hatena-bookmark:get-url'.
+DO NOT SET VALUE MANUALLY.")
+
+(defvar helm-hatena-bookmark:curl-program (executable-find "curl"))
+
+(defvar helm-hatena-bookmark:sed-program nil
+  "Cache a result of `helm-hatena-bookmark:find-sed-program'.
+DO NOT SET VALUE MANUALLY.")
+
+(defvar helm-hatena-bookmark:http-buffer-name " *helm-hatena-bookmark*"
+  "Working buffer name of `helm-hatena-bookmark:http-request'.")
 
 (defvar helm-hatena-bookmark-file "~/.hatenabookmark")
 (defvar helm-hatena-bookmark-candidate-number-limit 9999)
 (defvar helm-hatena-bookmark-full-frame helm-full-frame)
 
-;;;###autoload
-(defun helm-hatena-bookmark-get-dump ()
-  "Get Hatena::Bookmark dump file."
-  (interactive)
-  (let
-      ((created (format-time-string "%Y-%m-%dT%TZ" (current-time)))
-       (nonce (sha1 (format-time-string "%Y-%m-%dT%T%z" (current-time))))
-       (url "http://b.hatena.ne.jp/dump")
-       (url-request-extra-headers nil)
-       (x-wsse "")
-       (x-wsse-list nil)
-       (entry-list nil)
-       (id (read-string "Hatena ID: "))
-       (password (read-passwd "Password: ")))
-    (setq x-wsse (concat "UsernameToken Username=\"" id "\", PasswordDigest=\"" (base64-encode-string (sha1 (concat nonce created password) nil nil 'binary)) "\", Nonce=\"" (base64-encode-string nonce) "\", Created=\"" created "\""))
-    (setq x-wsse-list (cons "X-WSSE" x-wsse))
-    (setq url-request-extra-headers (list x-wsse-list))
-    (switch-to-buffer (url-retrieve-synchronously url))
-    (goto-char (point-min))
-    (re-search-forward "^$" nil 'move)
-    (delete-region (point-min) (1+ (point)))
-    (goto-char (point-min))
-    (while (re-search-forward "\n" nil t)
-      (replace-match ""))
-    (goto-char (point-min))
-    (while (re-search-forward "> +<" nil t)
-      (replace-match "><"))
-    (setq entry-list (xml-get-children (car (xml-parse-region (point-min) (point-max))) 'entry))
-    (delete-region (point-min) (point-max))
-    (loop for elm in entry-list
-          do (insert
-              (concat
-               (apply 'concat (loop for elmelm in (xml-get-children elm 'dc:subject) collect (concat "[" (nth 2 elmelm) "]")))
-               " "
-               (let ((title (nth 2 (car (xml-get-children elm 'title)))))
-                 (while (string-match "[\n\t]" title)
-                     (setq title (replace-match "" nil nil title)))
-                 title)
-               (concat " [summary:" (nth 2 (car (xml-get-children elm 'summary))))
-               (concat "][href:" (xml-get-attribute (car (xml-get-children elm 'link)) 'href))
-               "]\n")))
-    (write-file helm-hatena-bookmark-file)
-    (kill-buffer (current-buffer))))
+(defvar helm-hatena-bookmark:timer nil
+  "Timer object for timeline refreshing will be stored here.
+DO NOT SET VALUE MANUALLY.")
 
-(defun helm-hatena-bookmark--load ()
+(defcustom helm-hatena-bookmark:interval (* 1 60 60)
+  "Number of seconds to call `helm-hatena-bookmark:http-request'."
+  :type 'integer
+  :group 'helm-hatena-bookmark)
+
+(defvar helm-hatena-bookmark:profile-start-time nil)
+(defvar helm-hatena-bookmark:debug-mode nil)
+
+(defun helm-hatena-bookmark:load ()
   "Load `helm-hatena-bookmark-file'."
   (with-current-buffer (helm-candidate-buffer 'global)
     (let ((coding-system-for-read 'utf-8))
       (insert-file-contents helm-hatena-bookmark-file))))
 
-(defvar helm-hatena-bookmark--action
-  '(("Browse URL" . helm-hatena-bookmark--browse-url)
-    ("Show URL" . helm-hatena-bookmark--show-url)
-    ("Show Summary" . helm-hatena-bookmark--show-summary)))
+(defvar helm-hatena-bookmark:action
+  '(("Browse URL" . helm-hatena-bookmark:browse-url)
+    ("Show URL" . helm-hatena-bookmark:show-url)
+    ("Show Summary" . helm-hatena-bookmark:show-summary)))
 
-(defun helm-hatena-bookmark--browse-url (candidate)
+(defun helm-hatena-bookmark:browse-url (candidate)
   "Action for Browse URL.
 Argument CANDIDATE a line string of a bookmark."
   (string-match "\\[href:\\(.+\\)\\]$" candidate)
   (browse-url (match-string 1 candidate)))
 
-(defun helm-hatena-bookmark--show-url (candidate)
+(defun helm-hatena-bookmark:show-url (candidate)
   "Action for Show URL.
 Argument CANDIDATE a line string of a bookmark."
   (string-match "\\[href:\\(.+\\)\\]$" candidate)
   (message (match-string 1 candidate)))
 
-(defun helm-hatena-bookmark--show-summary (candidate)
+(defun helm-hatena-bookmark:show-summary (candidate)
   "Action for Show Summary.
 Argument CANDIDATE a line string of a bookmark."
   (string-match "\\[summary:\\(.+\\)\\]\\[" candidate)
   (message (match-string 1 candidate)))
 
-(defvar helm-hatena-bookmark--source
+(defvar helm-hatena-bookmark:source
   `((name . "Hatena::Bookmark")
-    (init . helm-hatena-bookmark--load)
+    (init . helm-hatena-bookmark:load)
     (candidates-in-buffer)
     (candidate-number-limit . ,helm-hatena-bookmark-candidate-number-limit)
     (multiline)
-    (action . ,helm-hatena-bookmark--action))
+    (action . ,helm-hatena-bookmark:action))
   "Helm source for Hatena::Bookmark.")
 
 ;;;###autoload
@@ -122,9 +110,88 @@ Argument CANDIDATE a line string of a bookmark."
   (interactive)
   (let ((helm-full-frame helm-hatena-bookmark-full-frame))
     (unless (file-exists-p helm-hatena-bookmark-file)
-      (helm-hatena-bookmark-get-dump))
-    (helm :sources helm-hatena-bookmark--source
+      (error (format "%s not found" helm-hatena-bookmark-file)))
+    (helm :sources helm-hatena-bookmark:source
 	  :prompt "Find Bookmark: ")))
+
+(defun helm-hatena-bookmark:find-sed-program ()
+  "Return an appropriate `sed' program pathname or error if not found."
+  (executable-find
+   (cond
+    ((eq system-type 'darwin)
+     (unless (executable-find "gsed")
+       (error "Cannot find `gsed' helm-hatena-bookmark.el requires.  (example `$ brew install gnu-sed')"))
+     "gsed")
+    (t
+     "sed"))))
+
+(defun helm-hatena-bookmark:get-url ()
+  "Return Hatena::Bookmark URL or error if `helm-hatena-bookmark:username' is nil."
+  (unless helm-hatena-bookmark:username
+    (error "Variable `helm-hatena-bookmark:username' is nil"))
+  (format "http://b.hatena.ne.jp/%s/search.data"
+	  helm-hatena-bookmark:username))
+
+(defun helm-hatena-bookmark:http-request ()
+  "Make a new HTTP request for create `helm-hatena-bookmark-file'."
+  (let ((buffer-name helm-hatena-bookmark:http-buffer-name)
+	(proc-name "helm-hatena-bookmark")
+	(curl-args `("--silent" "--compressed" ,helm-hatena-bookmark:url))
+	proc)
+    (if (get-buffer buffer-name)
+	(kill-buffer buffer-name))
+    (setq helm-hatena-bookmark:profile-start-time (current-time))
+    (setq proc (apply 'start-process
+		      proc-name
+		      buffer-name
+		      helm-hatena-bookmark:curl-program
+		      curl-args))
+    (set-process-sentinel proc 'helm-hatena-bookmark:http-request-sentinel)))
+
+(defun helm-hatena-bookmark:http-request-sentinel (process event)
+  "Receive a response of `helm-hatena-bookmark:http-request'.
+Argument PROCESS is a http-request process.
+Argument EVENT is a string describing the type of event."
+  (let ((buffer-name helm-hatena-bookmark:http-buffer-name) result)
+    (with-current-buffer (get-buffer buffer-name)
+      (let ((sed-args '("-n" "N; N; s/\\(.*\\)\\n\\(\\[.*\\]\\)\\?\\(.*\\)\\n\\(http.*\\)/\\2 \\1 [summary:\\3][href:\\4]/p")))
+	(apply 'call-process-region
+	       (point-min) (point-max)
+	       helm-hatena-bookmark:sed-program t '(t nil) nil
+	       sed-args)
+	(setq result (> (point-max) 0))
+	(if result
+	    (write-region (point-min) (point-max) helm-hatena-bookmark-file))))
+    (kill-buffer buffer-name))
+  (if helm-hatena-bookmark:debug-mode
+      (message (format "%s to create %s (%0.1fsec)."
+		       (if result "Success" "Failure")
+		       helm-hatena-bookmark-file
+		       (time-to-seconds
+			(time-subtract (current-time)
+				       helm-hatena-bookmark:profile-start-time))))))
+
+(defun helm-hatena-bookmark:set-timer ()
+  "Set timer."
+  (setq helm-hatena-bookmark:timer
+	(run-at-time "0 sec"
+		     helm-hatena-bookmark:interval
+		     #'helm-hatena-bookmark:http-request)))
+
+(defun helm-hatena-bookmark:cancel-timer ()
+  "Cancel timer."
+  (when helm-hatena-bookmark:timer
+    (cancel-timer helm-hatena-bookmark:timer)
+    (setq helm-hatena-bookmark:timer nil)))
+
+;;;###autoload
+(defun helm-hatena-bookmark:initialize ()
+  "Initialize `helm-hatena-bookmark'."
+  (setq helm-hatena-bookmark:url
+	(helm-hatena-bookmark:get-url))
+  (setq helm-hatena-bookmark:sed-program
+	(helm-hatena-bookmark:find-sed-program))
+  (helm-hatena-bookmark:set-timer))
 
 (provide 'helm-hatena-bookmark)
 
