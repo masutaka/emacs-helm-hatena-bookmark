@@ -4,13 +4,20 @@
 
 `helm-hatena-bookmark.el` is Hatena::Bookmark helm interface.
 
+## Setup
+
+```lisp
+(setq helm-hatena-bookmark:username "Your Hatena Account")
+(helm-hatena-bookmark:initialize)
+```
+
 ## Usage
 
 ### `helm-hatena-bookmark`
 
 * A function to be able to select your Hatena::Bookmark.
 
-### `helm-hatena-bookmark--source`
+### `helm-hatena-bookmark:source`
 
 * A helm source for your Hatena::Bookmark.
 
