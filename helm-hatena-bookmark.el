@@ -152,17 +152,20 @@ Argument CANDIDATE a line string of a bookmark."
   "Receive a response of `helm-hatena-bookmark:http-request'.
 Argument PROCESS is a http-request process.
 Argument EVENT is a string describing the type of event."
-  (let ((buffer-name helm-hatena-bookmark:http-buffer-name))
+  (let ((buffer-name helm-hatena-bookmark:http-buffer-name) result)
     (with-current-buffer (get-buffer buffer-name)
       (let ((sed-args '("-n" "N; N; s/\\(.*\\)\\n\\(\\[.*\\]\\)\\?\\(.*\\)\\n\\(http.*\\)/\\2 \\1 [summary:\\3][href:\\4]/p")))
 	(apply 'call-process-region
 	       (point-min) (point-max)
 	       helm-hatena-bookmark:sed-program t '(t nil) nil
 	       sed-args)
-	(write-region (point-min) (point-max) helm-hatena-bookmark-file)))
+	(setq result (> (point-max) 0))
+	(if result
+	    (write-region (point-min) (point-max) helm-hatena-bookmark-file))))
     (kill-buffer buffer-name))
   (if helm-hatena-bookmark:debug-mode
-      (message (format "Success to create %s (%0.1fsec)."
+      (message (format "%s to create %s (%0.1fsec)."
+		       (if result "Success" "Failure")
 		       helm-hatena-bookmark-file
 		       (time-to-seconds
 			(time-subtract (current-time)
