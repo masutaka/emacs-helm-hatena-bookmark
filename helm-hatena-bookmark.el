@@ -54,6 +54,15 @@ DO NOT SET VALUE MANUALLY.")
 (defvar helm-hatena-bookmark-candidate-number-limit 9999)
 (defvar helm-hatena-bookmark-full-frame helm-full-frame)
 
+(defvar helm-hatena-bookmark:timer nil
+  "Timer object for timeline refreshing will be stored here.
+DO NOT SET VALUE MANUALLY.")
+
+(defcustom helm-hatena-bookmark:interval (* 1 60 60)
+  "Number of seconds to call `helm-hatena-bookmark:http-request'."
+  :type 'integer
+  :group 'helm-hatena-bookmark)
+
 (defvar helm-hatena-bookmark:profile-start-time nil)
 (defvar helm-hatena-bookmark:debug-mode nil)
 
@@ -159,6 +168,19 @@ Argument EVENT is a string describing the type of event."
 			(time-subtract (current-time)
 				       helm-hatena-bookmark:profile-start-time))))))
 
+(defun helm-hatena-bookmark:set-timer ()
+  "Set timer."
+  (setq helm-hatena-bookmark:timer
+	(run-at-time "0 sec"
+		     helm-hatena-bookmark:interval
+		     #'helm-hatena-bookmark:http-request)))
+
+(defun helm-hatena-bookmark:cancel-timer ()
+  "Cancel timer."
+  (when helm-hatena-bookmark:timer
+    (cancel-timer helm-hatena-bookmark:timer)
+    (setq helm-hatena-bookmark:timer nil)))
+
 ;;;###autoload
 (defun helm-hatena-bookmark:initialize ()
   "Initialize `helm-hatena-bookmark'."
@@ -166,7 +188,7 @@ Argument EVENT is a string describing the type of event."
 	(helm-hatena-bookmark:get-url))
   (setq helm-hatena-bookmark:sed-program
 	(helm-hatena-bookmark:find-sed-program))
-  (helm-hatena-bookmark:http-request))
+  (helm-hatena-bookmark:set-timer))
 
 (provide 'helm-hatena-bookmark)
 
