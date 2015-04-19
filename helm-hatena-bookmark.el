@@ -51,7 +51,7 @@ DO NOT SET VALUE MANUALLY.")
   "Working buffer name of `helm-hatena-bookmark:http-request'.")
 
 (defvar helm-hatena-bookmark-file "~/.hatenabookmark")
-(defvar helm-hatena-bookmark-candidate-number-limit 9999)
+(defvar helm-hatena-bookmark-candidate-number-limit 10000)
 (defvar helm-hatena-bookmark-full-frame helm-full-frame)
 
 (defvar helm-hatena-bookmark:timer nil
