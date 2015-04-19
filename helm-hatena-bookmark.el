@@ -57,7 +57,9 @@
   "Cache a result of `helm-hatena-bookmark:get-url'.
 DO NOT SET VALUE MANUALLY.")
 
-(defvar helm-hatena-bookmark:curl-program (executable-find "curl"))
+(defvar helm-hatena-bookmark:curl-program nil
+  "Cache a result of `helm-hatena-bookmark:find-curl-program'.
+DO NOT SET VALUE MANUALLY.")
 
 (defvar helm-hatena-bookmark:sed-program nil
   "Cache a result of `helm-hatena-bookmark:find-sed-program'.
@@ -122,6 +124,12 @@ Argument CANDIDATE a line string of a bookmark."
       (error (format "%s not found" helm-hatena-bookmark-file)))
     (helm :sources helm-hatena-bookmark:source
 	  :prompt "Find Bookmark: ")))
+
+(defun helm-hatena-bookmark:find-curl-program ()
+  "Return an appropriate `curl' program pathname or error if not found."
+  (or
+   (executable-find "curl")
+   (error "Cannot find `curl' helm-hatena-bookmark.el requires")))
 
 (defun helm-hatena-bookmark:find-sed-program ()
   "Return an appropriate `sed' program pathname or error if not found."
@@ -199,6 +207,8 @@ Argument EVENT is a string describing the type of event."
   "Initialize `helm-hatena-bookmark'."
   (setq helm-hatena-bookmark:url
 	(helm-hatena-bookmark:get-url))
+  (setq helm-hatena-bookmark:curl-program
+	(helm-hatena-bookmark:find-curl-program))
   (setq helm-hatena-bookmark:sed-program
 	(helm-hatena-bookmark:find-sed-program))
   (helm-hatena-bookmark:set-timer))
