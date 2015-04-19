@@ -4,6 +4,21 @@
 
 `helm-hatena-bookmark.el` is Hatena::Bookmark helm interface.
 
+## Screenshot
+
+![helm-hatena-bookmark](image/helm-hatena-bookmark.gif)
+
+## Requirements
+
+* Emacs 24 or higher
+* helm 1.6.9 or higher
+* curl
+* GNU sed
+
+## Installation
+
+You can install `helm-hatena-bookmark.el` from [MELPA](https://github.com/milkypostman/melpa.git) with package.el (`M-x package-install helm-hatena-bookmark`).
+
 ## Setup
 
 ```lisp
