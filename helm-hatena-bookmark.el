@@ -32,7 +32,7 @@
   :group 'helm)
 
 (defcustom helm-hatena-bookmark:username nil
-  "*A username of your Hatena account."
+  "A username of your Hatena account."
   :type '(choice (const nil)
 		 string)
   :group 'helm-hatena-bookmark)
@@ -50,8 +50,17 @@ DO NOT SET VALUE MANUALLY.")
 (defvar helm-hatena-bookmark:http-buffer-name " *helm-hatena-bookmark*"
   "Working buffer name of `helm-hatena-bookmark:http-request'.")
 
-(defvar helm-hatena-bookmark-file "~/.hatenabookmark")
-(defvar helm-hatena-bookmark-candidate-number-limit 10000)
+(defcustom helm-hatena-bookmark-file "~/.hatenabookmark"
+  "A cache file of your Hatena::Bookmark."
+  :type '(choice (const nil)
+		 string)
+  :group 'helm-hatena-bookmark)
+
+(defcustom helm-hatena-bookmark-candidate-number-limit 10000
+  "Candidate number limit."
+  :type 'integer
+  :group 'helm-hatena-bookmark)
+
 (defvar helm-hatena-bookmark-full-frame helm-full-frame)
 
 (defvar helm-hatena-bookmark:timer nil
