@@ -69,7 +69,7 @@ DO NOT SET VALUE MANUALLY.")
 (defvar helm-hatena-bookmark-full-frame helm-full-frame)
 
 (defvar helm-hatena-bookmark:timer nil
-  "Timer object for timeline refreshing will be stored here.
+  "Timer object for Hatena::Bookmark caching will be stored here.
 DO NOT SET VALUE MANUALLY.")
 
 (defvar helm-hatena-bookmark:debug-mode nil)
