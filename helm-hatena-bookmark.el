@@ -72,8 +72,8 @@ DO NOT SET VALUE MANUALLY.")
   :type 'integer
   :group 'helm-hatena-bookmark)
 
-(defvar helm-hatena-bookmark:profile-start-time nil)
 (defvar helm-hatena-bookmark:debug-mode nil)
+(defvar helm-hatena-bookmark:debug-start-time nil)
 
 (defun helm-hatena-bookmark:load ()
   "Load `helm-hatena-bookmark-file'."
@@ -149,7 +149,7 @@ Argument CANDIDATE a line string of a bookmark."
 	proc)
     (if (get-buffer buffer-name)
 	(kill-buffer buffer-name))
-    (setq helm-hatena-bookmark:profile-start-time (current-time))
+    (setq helm-hatena-bookmark:debug-start-time (current-time))
     (setq proc (apply 'start-process
 		      proc-name
 		      buffer-name
@@ -179,7 +179,7 @@ Argument EVENT is a string describing the type of event."
 			 helm-hatena-bookmark-file
 			 (time-to-seconds
 			  (time-subtract (current-time)
-					 helm-hatena-bookmark:profile-start-time)))))))
+					 helm-hatena-bookmark:debug-start-time)))))))
 
 (defun helm-hatena-bookmark:set-timer ()
   "Set timer."
