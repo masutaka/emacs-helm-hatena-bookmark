@@ -178,7 +178,7 @@ Argument EVENT is a string describing the type of event."
 	       (point-min) (point-max)
 	       helm-hatena-bookmark:sed-program t '(t nil) nil
 	       sed-args)
-	(setq result (> (point-max) 0))
+	(setq result (>= (- (point-max) (point-min)) 1))
 	(when result
 	  (message (format "[B!] write-region at %s, result:%s, point-min:%d, point-max:%d"
 			   (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)) result (point-min) (point-max)))
