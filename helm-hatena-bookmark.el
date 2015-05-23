@@ -179,8 +179,10 @@ Argument EVENT is a string describing the type of event."
 	       helm-hatena-bookmark:sed-program t '(t nil) nil
 	       sed-args)
 	(setq result (> (point-max) 0))
-	(if result
-	    (write-region (point-min) (point-max) helm-hatena-bookmark-file))))
+	(when result
+	  (message (format "[B!] write-region at %s, result:%s, point-min:%d, point-max:%d"
+			   (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)) result (point-min) (point-max)))
+	  (write-region (point-min) (point-max) helm-hatena-bookmark-file))))
     (if result (kill-buffer buffer-name))
     (if helm-hatena-bookmark:debug-mode
 	(message (format "%s to create %s (%0.1fsec)."
