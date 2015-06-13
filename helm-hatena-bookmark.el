@@ -155,15 +155,16 @@ Argument CANDIDATE a line string of a bookmark."
 	(proc-name "helm-hatena-bookmark")
 	(curl-args `("--silent" "--compressed" ,helm-hatena-bookmark:url))
 	proc)
-    (if (get-buffer buffer-name)
-	(kill-buffer buffer-name))
-    (setq helm-hatena-bookmark:debug-start-time (current-time))
-    (setq proc (apply 'start-process
-		      proc-name
-		      buffer-name
-		      helm-hatena-bookmark:curl-program
-		      curl-args))
-    (set-process-sentinel proc 'helm-hatena-bookmark:http-request-sentinel)))
+    (unless (get-buffer-process buffer-name)
+      (if (get-buffer buffer-name)
+	  (kill-buffer buffer-name))
+      (setq helm-hatena-bookmark:debug-start-time (current-time))
+      (setq proc (apply 'start-process
+			proc-name
+			buffer-name
+			helm-hatena-bookmark:curl-program
+			curl-args))
+      (set-process-sentinel proc 'helm-hatena-bookmark:http-request-sentinel))))
 
 (defun helm-hatena-bookmark:http-request-sentinel (process event)
   "Receive a response of `helm-hatena-bookmark:http-request'.
@@ -177,9 +178,12 @@ Argument EVENT is a string describing the type of event."
 	       (point-min) (point-max)
 	       helm-hatena-bookmark:sed-program t '(t nil) nil
 	       sed-args)
-	(setq result (> (point-max) 0))
-	(if result
-	    (write-region (point-min) (point-max) helm-hatena-bookmark-file))))
+	(setq result (> (point-max) (point-min)))
+	(when result
+	  (if helm-hatena-bookmark:debug-mode
+	      (message (format "[B!] write-region at %s, result:%s, point-min:%d, point-max:%d"
+			       (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)) result (point-min) (point-max))))
+	  (write-region (point-min) (point-max) helm-hatena-bookmark-file))))
     (if result (kill-buffer buffer-name))
     (if helm-hatena-bookmark:debug-mode
 	(message (format "%s to create %s (%0.1fsec)."
