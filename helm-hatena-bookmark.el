@@ -186,12 +186,13 @@ Argument EVENT is a string describing the type of event."
 	  (write-region (point-min) (point-max) helm-hatena-bookmark-file))))
     (if result (kill-buffer buffer-name))
     (if helm-hatena-bookmark:debug-mode
-	(message (format "[B!] %s to create %s (%0.1fsec)."
+	(message (format "[B!] %s to create %s (%0.1fsec) at %s."
 			 (if result "Success" "Failure")
 			 helm-hatena-bookmark-file
 			 (time-to-seconds
 			  (time-subtract (current-time)
-					 helm-hatena-bookmark:debug-start-time)))))))
+					 helm-hatena-bookmark:debug-start-time))
+			 (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)))))))
 
 (defun helm-hatena-bookmark:set-timer ()
   "Set timer."
