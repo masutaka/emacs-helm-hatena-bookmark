@@ -29,6 +29,7 @@
 
 (defgroup helm-hatena-bookmark nil
   "Settings for helm-hatena-bookmark."
+  :prefix "helm-hatena-bookmark-"
   :group 'helm)
 
 (defcustom helm-hatena-bookmark:username nil
