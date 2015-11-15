@@ -28,7 +28,7 @@
 (require 'helm)
 
 (defgroup helm-hatena-bookmark nil
-  "Settings for helm-hatena-bookmark."
+  "Hatena::Bookmark with helm interface"
   :prefix "helm-hatena-bookmark-"
   :group 'helm)
 
