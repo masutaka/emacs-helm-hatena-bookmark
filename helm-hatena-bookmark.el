@@ -108,12 +108,12 @@ Argument CANDIDATE a line string of a bookmark."
   (message (match-string 1 candidate)))
 
 (defvar helm-hatena-bookmark:source
-  `((name . "Hatena::Bookmark")
-    (init . helm-hatena-bookmark:load)
-    (candidates-in-buffer)
-    (candidate-number-limit . ,helm-hatena-bookmark-candidate-number-limit)
-    (multiline)
-    (action . ,helm-hatena-bookmark:action))
+  (helm-build-in-buffer-source "Hatena:Bookmark"
+    :init 'helm-hatena-bookmark:load
+    :action 'helm-hatena-bookmark:action
+    :candidate-number-limit helm-hatena-bookmark-candidate-number-limit
+    :multiline t
+    :migemo t)
   "Helm source for Hatena::Bookmark.")
 
 ;;;###autoload
