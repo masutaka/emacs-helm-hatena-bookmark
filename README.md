@@ -10,8 +10,8 @@
 
 ## Requirements
 
-* Emacs 24.3 or higher
-* helm 1.6.9 or higher
+* Emacs 24.5 or higher
+* helm 1.8.0 or higher
 * curl
 * GNU sed
 
