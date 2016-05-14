@@ -167,10 +167,10 @@ Argument CANDIDATE a line string of a bookmark."
 			curl-args))
       (set-process-sentinel proc 'helm-hatena-bookmark:http-request-sentinel))))
 
-(defun helm-hatena-bookmark:http-request-sentinel (process event)
+(defun helm-hatena-bookmark:http-request-sentinel (_process _event)
   "Receive a response of `helm-hatena-bookmark:http-request'.
-Argument PROCESS is a http-request process.
-Argument EVENT is a string describing the type of event."
+Argument _PROCESS is a http-request process.
+Argument _EVENT is a string describing the type of event."
   (let ((buffer-name helm-hatena-bookmark:http-buffer-name)
 	result)
     (with-current-buffer (get-buffer buffer-name)
