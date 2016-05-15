@@ -180,11 +180,19 @@ Argument CANDIDATE a line string of a bookmark."
   "Receive a response of `helm-hatena-bookmark-http-request'.
 Argument PROCESS is a http-request process.
 Argument _EVENT is a string describing the type of event."
+  (ignore-errors
+    (helm-hatena-bookmark-handle-http-response process)))
+
+(defun helm-hatena-bookmark-handle-http-response (process)
+  "Handle a response of `helm-hatena-bookmark-http-request'.
+Argument PROCESS is a http-request process."
   (let ((buffer-name helm-hatena-bookmark-http-buffer-name)
 	result)
     (with-current-buffer (get-buffer buffer-name)
       (setq valid-response (helm-hatena-bookmark-valid-http-responsep))
       (helm-hatena-bookmark-http-debug-finish valid-response process)
+      (unless valid-response
+	(error "Invalid http response"))
       (let ((sed-args '("-n" "N; N; s/\\(.*\\)\\n\\(\\[.*\\]\\)\\?\\(.*\\)\\n\\(http.*\\)/\\2 \\1 [summary:\\3][href:\\4]/p")))
 	(apply 'call-process-region
 	       (+ (helm-hatena-bookmark-point-of-separator) 1)
