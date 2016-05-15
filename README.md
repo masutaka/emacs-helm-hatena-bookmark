@@ -22,8 +22,8 @@ You can install `helm-hatena-bookmark.el` from [MELPA](https://github.com/milkyp
 ## Setup
 
 ```lisp
-(setq helm-hatena-bookmark:username "Your Hatena Account")
-(helm-hatena-bookmark:initialize)
+(setq helm-hatena-bookmark-username "Your Hatena Account")
+(helm-hatena-bookmark-initialize)
 ```
 
 ## Usage
@@ -32,7 +32,7 @@ You can install `helm-hatena-bookmark.el` from [MELPA](https://github.com/milkyp
 
 * A function to be able to select your Hatena::Bookmark.
 
-### `helm-hatena-bookmark:source`
+### `helm-hatena-bookmark-source`
 
 * A helm source for your Hatena::Bookmark.
 
