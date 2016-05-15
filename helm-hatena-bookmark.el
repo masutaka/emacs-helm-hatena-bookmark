@@ -186,26 +186,17 @@ Argument _EVENT is a string describing the type of event."
 (defun helm-hatena-bookmark-handle-http-response (process)
   "Handle a response of `helm-hatena-bookmark-http-request'.
 Argument PROCESS is a http-request process."
-  (let ((buffer-name helm-hatena-bookmark-http-buffer-name)
-	result)
-    (with-current-buffer (get-buffer buffer-name)
-      (setq valid-response (helm-hatena-bookmark-valid-http-responsep))
-      (helm-hatena-bookmark-http-debug-finish valid-response process)
-      (unless valid-response
-	(error "Invalid http response"))
-      (let ((sed-args '("-n" "N; N; s/\\(.*\\)\\n\\(\\[.*\\]\\)\\?\\(.*\\)\\n\\(http.*\\)/\\2 \\1 [summary:\\3][href:\\4]/p")))
-	(apply 'call-process-region
-	       (+ (helm-hatena-bookmark-point-of-separator) 1)
-	       (point-max)
-	       helm-hatena-bookmark-sed-program t '(t nil) nil
-	       sed-args)
-	(setq result (> (point-max) (+ (helm-hatena-bookmark-point-of-separator) 1)))
-	(when result
-	  (if helm-hatena-bookmark-debug-mode
-	      (message (format "[B!] write-region at %s, result:%s, point-min:%d, point-max:%d"
-			       (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)) result (+ (helm-hatena-bookmark-point-of-separator) 1) (point-max))))
-	  (write-region (+ (helm-hatena-bookmark-point-of-separator) 1) (point-max) helm-hatena-bookmark-file))))
-    (if result (kill-buffer buffer-name))))
+  (let ((buffer-name helm-hatena-bookmark-http-buffer-name))
+    (unwind-protect
+	(with-current-buffer (get-buffer buffer-name)
+	  (setq valid-response (helm-hatena-bookmark-valid-http-responsep))
+	  (helm-hatena-bookmark-http-debug-finish valid-response process)
+	  (unless valid-response
+	    (error "Invalid http response"))
+	  (unless (helm-hatena-bookmark-filter-http-response)
+	    (error "Fail to filter http response"))
+	  (write-region (point-min) (point-max) helm-hatena-bookmark-file))
+      (kill-buffer buffer-name))))
 
 (defun helm-hatena-bookmark-valid-http-responsep ()
   "Return if the http response is valid."
@@ -213,6 +204,20 @@ Argument PROCESS is a http-request process."
     (goto-char (point-min))
     (re-search-forward
      (concat "^" (regexp-quote "HTTP/1.1 200 OK")) (point-at-eol) t)))
+
+(defun helm-hatena-bookmark-filter-http-response ()
+  (let ((sed-args '("-n" "N; N; s/\\(.*\\)\\n\\(\\[.*\\]\\)\\?\\(.*\\)\\n\\(http.*\\)/\\2 \\1 [summary:\\3][href:\\4]/p"))
+	result)
+    (delete-region (point-min) (+ (helm-hatena-bookmark-point-of-separator) 1))
+    (apply 'call-process-region
+	   (point-min) (point-max)
+	   helm-hatena-bookmark-sed-program t '(t nil) nil
+	   sed-args)
+    (setq result (> (point-max) (point-min)))
+    (if helm-hatena-bookmark-debug-mode
+	(message (format "[B!] write-region at %s, result:%s, point-min:%d, point-max:%d"
+			 (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)) result (point-min) (point-max))))
+    result))
 
 (defun helm-hatena-bookmark-point-of-separator ()
   "Return point between header and body of the http response, as an integer."
