@@ -163,7 +163,7 @@ Argument CANDIDATE a line string of a bookmark."
   "Make a new HTTP request for create `helm-hatena-bookmark-file'."
   (let ((buffer-name helm-hatena-bookmark-http-buffer-name)
 	(proc-name "helm-hatena-bookmark")
-	(curl-args `("--silent" "--compressed" ,helm-hatena-bookmark-url))
+	(curl-args `("--include" "--compressed" ,helm-hatena-bookmark-url))
 	proc)
     (unless (get-buffer-process buffer-name)
       (if (get-buffer buffer-name)
@@ -176,24 +176,27 @@ Argument CANDIDATE a line string of a bookmark."
 			curl-args))
       (set-process-sentinel proc 'helm-hatena-bookmark-http-request-sentinel))))
 
-(defun helm-hatena-bookmark-http-request-sentinel (_process _event)
+(defun helm-hatena-bookmark-http-request-sentinel (process _event)
   "Receive a response of `helm-hatena-bookmark-http-request'.
-Argument _PROCESS is a http-request process.
+Argument PROCESS is a http-request process.
 Argument _EVENT is a string describing the type of event."
   (let ((buffer-name helm-hatena-bookmark-http-buffer-name)
 	result)
     (with-current-buffer (get-buffer buffer-name)
+      (setq valid-response (helm-hatena-bookmark-valid-http-responsep))
+      (helm-hatena-bookmark-http-debug-finish valid-response process)
       (let ((sed-args '("-n" "N; N; s/\\(.*\\)\\n\\(\\[.*\\]\\)\\?\\(.*\\)\\n\\(http.*\\)/\\2 \\1 [summary:\\3][href:\\4]/p")))
 	(apply 'call-process-region
-	       (point-min) (point-max)
+	       (+ (helm-hatena-bookmark-point-of-separator) 1)
+	       (point-max)
 	       helm-hatena-bookmark-sed-program t '(t nil) nil
 	       sed-args)
-	(setq result (> (point-max) (point-min)))
+	(setq result (> (point-max) (+ (helm-hatena-bookmark-point-of-separator) 1)))
 	(when result
 	  (if helm-hatena-bookmark-debug-mode
 	      (message (format "[B!] write-region at %s, result:%s, point-min:%d, point-max:%d"
-			       (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)) result (point-min) (point-max))))
-	  (write-region (point-min) (point-max) helm-hatena-bookmark-file))))
+			       (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)) result (+ (helm-hatena-bookmark-point-of-separator) 1) (point-max))))
+	  (write-region (+ (helm-hatena-bookmark-point-of-separator) 1) (point-max) helm-hatena-bookmark-file))))
     (if result (kill-buffer buffer-name))
     (if helm-hatena-bookmark-debug-mode
 	(message (format "[B!] %s to create %s (%0.1fsec) at %s."
@@ -204,9 +207,35 @@ Argument _EVENT is a string describing the type of event."
 					 helm-hatena-bookmark-debug-start-time))
 			 (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)))))))
 
+(defun helm-hatena-bookmark-valid-http-responsep ()
+  "Return if the http response is valid."
+  (save-excursion
+    (goto-char (point-min))
+    (re-search-forward
+     (concat "^" (regexp-quote "HTTP/1.1 200 OK")) (point-at-eol) t)))
+
+(defun helm-hatena-bookmark-point-of-separator ()
+  "Return point between header and body of the http response, as an integer."
+  (save-excursion
+    (goto-char (point-min))
+    (re-search-forward "^?$" nil t)))
+
 (defun helm-hatena-bookmark-http-debug-start ()
   "Start debug mode."
   (setq helm-hatena-bookmark-debug-start-time (current-time)))
+
+(defun helm-hatena-bookmark-http-debug-finish (result process)
+  "Stop debug mode.
+RESULT is boolean.
+PROCESS is a http-request process."
+  (if helm-hatena-bookmark-debug-mode
+      (message (format "[B!] %s to GET %s (%0.1fsec) at %s."
+		       (if result "Success" "Failure")
+		       (car (last (process-command process)))
+		       (time-to-seconds
+			(time-subtract (current-time)
+				       helm-hatena-bookmark-debug-start-time))
+		       (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))))
 
 (defun helm-hatena-bookmark-set-timer ()
   "Set timer."
