@@ -168,7 +168,7 @@ Argument CANDIDATE a line string of a bookmark."
     (unless (get-buffer-process buffer-name)
       (if (get-buffer buffer-name)
 	  (kill-buffer buffer-name))
-      (setq helm-hatena-bookmark-debug-start-time (current-time))
+      (helm-hatena-bookmark-http-debug-start)
       (setq proc (apply 'start-process
 			proc-name
 			buffer-name
@@ -203,6 +203,10 @@ Argument _EVENT is a string describing the type of event."
 			  (time-subtract (current-time)
 					 helm-hatena-bookmark-debug-start-time))
 			 (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)))))))
+
+(defun helm-hatena-bookmark-http-debug-start ()
+  "Start debug mode."
+  (setq helm-hatena-bookmark-debug-start-time (current-time)))
 
 (defun helm-hatena-bookmark-set-timer ()
   "Set timer."
