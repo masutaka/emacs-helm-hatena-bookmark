@@ -186,21 +186,22 @@ Argument PROCESS is a http-request process."
   (let ((buffer-name helm-hatena-bookmark-http-buffer-name))
     (unwind-protect
 	(with-current-buffer (get-buffer buffer-name)
-	  (setq valid-response (helm-hatena-bookmark-valid-http-responsep))
-	  (helm-hatena-bookmark-http-debug-finish valid-response process)
-	  (unless valid-response
+	  (unless (helm-hatena-bookmark-valid-http-responsep process)
 	    (error "Invalid http response"))
 	  (unless (helm-hatena-bookmark-filter-http-response)
 	    (error "Fail to filter http response"))
 	  (write-region (point-min) (point-max) helm-hatena-bookmark-file))
       (kill-buffer buffer-name))))
 
-(defun helm-hatena-bookmark-valid-http-responsep ()
+(defun helm-hatena-bookmark-valid-http-responsep (process)
   "Return if the http response is valid."
   (save-excursion
-    (goto-char (point-min))
-    (re-search-forward
-     (concat "^" (regexp-quote "HTTP/1.1 200 OK")) (point-at-eol) t)))
+    (let ((result))
+      (goto-char (point-min))
+      (setq result (re-search-forward
+		    (concat "^" (regexp-quote "HTTP/1.1 200 OK")) (point-at-eol) t))
+      (helm-hatena-bookmark-http-debug-finish result process)
+      result)))
 
 (defun helm-hatena-bookmark-filter-http-response ()
   (let ((sed-args '("-n" "N; N; s/\\(.*\\)\\n\\(\\[.*\\]\\)\\?\\(.*\\)\\n\\(http.*\\)/\\2 \\1 [summary:\\3][href:\\4]/p"))
