@@ -60,6 +60,8 @@
 (define-obsolete-variable-alias 'helm-hatena-bookmark:interval
   'helm-hatena-bookmark-interval "2.2.0")
 
+;;; Internal Variables
+
 (defvar helm-hatena-bookmark-url nil
   "Cache a result of `helm-hatena-bookmark-get-url'.
 DO NOT SET VALUE MANUALLY.")
@@ -82,7 +84,10 @@ DO NOT SET VALUE MANUALLY.")
 DO NOT SET VALUE MANUALLY.")
 
 (defvar helm-hatena-bookmark-debug-mode nil)
-(defvar helm-hatena-bookmark-debug-start-time nil)
+(defvar helm-hatena-bookmark-http-debug-start-time nil)
+(defvar helm-hatena-bookmark-filter-debug-start-time nil)
+
+;;; Helm source
 
 (defun helm-hatena-bookmark-load ()
   "Load `helm-hatena-bookmark-file'."
@@ -135,74 +140,112 @@ Argument CANDIDATE a line string of a bookmark."
     (helm :sources helm-hatena-bookmark-source
 	  :prompt "Find Bookmark: ")))
 
-(defun helm-hatena-bookmark-find-curl-program ()
-  "Return an appropriate `curl' program pathname or error if not found."
-  (or
-   (executable-find "curl")
-   (error "Cannot find `curl' helm-hatena-bookmark.el requires")))
-
-(defun helm-hatena-bookmark-find-sed-program ()
-  "Return an appropriate `sed' program pathname or error if not found."
-  (executable-find
-   (cond
-    ((eq system-type 'darwin)
-     (unless (executable-find "gsed")
-       (error "Cannot find `gsed' helm-hatena-bookmark.el requires.  (example `$ brew install gnu-sed')"))
-     "gsed")
-    (t
-     "sed"))))
-
-(defun helm-hatena-bookmark-get-url ()
-  "Return Hatena::Bookmark URL or error if `helm-hatena-bookmark-username' is nil."
-  (unless helm-hatena-bookmark-username
-    (error "Variable `helm-hatena-bookmark-username' is nil"))
-  (format "http://b.hatena.ne.jp/%s/search.data"
-	  helm-hatena-bookmark-username))
+;;; Process
 
 (defun helm-hatena-bookmark-http-request ()
   "Make a new HTTP request for create `helm-hatena-bookmark-file'."
-  (let ((buffer-name helm-hatena-bookmark-http-buffer-name)
-	(proc-name "helm-hatena-bookmark")
-	(curl-args `("--silent" "--compressed" ,helm-hatena-bookmark-url))
+  (let ((proc-name "helm-hatena-bookmark")
+	(curl-args `("--include" "--compressed" ,helm-hatena-bookmark-url))
 	proc)
-    (unless (get-buffer-process buffer-name)
-      (if (get-buffer buffer-name)
-	  (kill-buffer buffer-name))
-      (setq helm-hatena-bookmark-debug-start-time (current-time))
-      (setq proc (apply 'start-process
-			proc-name
-			buffer-name
-			helm-hatena-bookmark-curl-program
-			curl-args))
-      (set-process-sentinel proc 'helm-hatena-bookmark-http-request-sentinel))))
+    (helm-hatena-bookmark-http-debug-start)
+    (setq proc (apply 'start-process
+		      proc-name
+		      helm-hatena-bookmark-http-buffer-name
+		      helm-hatena-bookmark-curl-program
+		      curl-args))
+    (set-process-sentinel proc 'helm-hatena-bookmark-http-request-sentinel)))
 
-(defun helm-hatena-bookmark-http-request-sentinel (_process _event)
+(defun helm-hatena-bookmark-http-request-sentinel (process _event)
   "Receive a response of `helm-hatena-bookmark-http-request'.
-Argument _PROCESS is a http-request process.
+Argument PROCESS is a http-request process.
 Argument _EVENT is a string describing the type of event."
-  (let ((buffer-name helm-hatena-bookmark-http-buffer-name)
+  (let ((buffer-name helm-hatena-bookmark-http-buffer-name))
+    (ignore-errors
+      (unwind-protect
+	  (with-current-buffer (get-buffer buffer-name)
+	    (unless (helm-hatena-bookmark-valid-http-responsep process)
+	      (error "Invalid http response"))
+	    (unless (helm-hatena-bookmark-filter-http-response)
+	      (error "Fail to filter http response"))
+	    (write-region (point-min) (point-max) helm-hatena-bookmark-file))
+	(kill-buffer buffer-name)))))
+
+(defun helm-hatena-bookmark-valid-http-responsep (process)
+  "Return if the http response is valid.
+Argument PROCESS is a http-request process.
+Should to call in `helm-hatena-bookmark-http-buffer-name'."
+  (save-excursion
+    (let ((result))
+      (goto-char (point-min))
+      (setq result (re-search-forward
+		    (concat "^" (regexp-quote "HTTP/1.1 200 OK")) (point-at-eol) t))
+      (helm-hatena-bookmark-http-debug-finish result process)
+      result)))
+
+(defun helm-hatena-bookmark-filter-http-response ()
+  "Filter a response of `helm-hatena-bookmark-http-request'."
+  (let ((sed-args '("-n" "N; N; s/\\(.*\\)\\n\\(\\[.*\\]\\)\\?\\(.*\\)\\n\\(http.*\\)/\\2 \\1 [summary:\\3][href:\\4]/p"))
 	result)
-    (with-current-buffer (get-buffer buffer-name)
-      (let ((sed-args '("-n" "N; N; s/\\(.*\\)\\n\\(\\[.*\\]\\)\\?\\(.*\\)\\n\\(http.*\\)/\\2 \\1 [summary:\\3][href:\\4]/p")))
-	(apply 'call-process-region
-	       (point-min) (point-max)
-	       helm-hatena-bookmark-sed-program t '(t nil) nil
-	       sed-args)
-	(setq result (> (point-max) (point-min)))
-	(when result
-	  (if helm-hatena-bookmark-debug-mode
-	      (message (format "[B!] write-region at %s, result:%s, point-min:%d, point-max:%d"
-			       (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)) result (point-min) (point-max))))
-	  (write-region (point-min) (point-max) helm-hatena-bookmark-file))))
-    (if result (kill-buffer buffer-name))
-    (if helm-hatena-bookmark-debug-mode
-	(message (format "[B!] %s to create %s (%0.1fsec) at %s."
-			 (if result "Success" "Failure")
-			 helm-hatena-bookmark-file
-			 (time-to-seconds
-			  (time-subtract (current-time)
-					 helm-hatena-bookmark-debug-start-time))
-			 (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)))))))
+    (helm-hatena-bookmark-filter-debug-start)
+    (delete-region (point-min) (+ (helm-hatena-bookmark-point-of-separator) 1))
+    (apply 'call-process-region
+	   (point-min) (point-max)
+	   helm-hatena-bookmark-sed-program t '(t nil) nil
+	   sed-args)
+    (setq result (> (point-max) (point-min)))
+    (helm-hatena-bookmark-filter-debug-finish result)
+    result))
+
+(defun helm-hatena-bookmark-point-of-separator ()
+  "Return point between header and body of the http response, as an integer."
+  (save-excursion
+    (goto-char (point-min))
+    (re-search-forward "^?$" nil t)))
+
+;;; Debug
+
+(defsubst helm-hatena-bookmark-time-subtract-to-seconds (t1 t2)
+  "Subtract two time values, T1 minus T2.
+Return the seconds format."
+  (time-to-seconds (time-subtract t1 t2)))
+
+(defsubst helm-hatena-bookmark-format-time-string (time)
+  "Return time string of TIME with fixed format."
+  (format-time-string "%Y-%m-%d %H:%M:%S" time))
+
+(defun helm-hatena-bookmark-http-debug-start ()
+  "Start http debug mode."
+  (setq helm-hatena-bookmark-http-debug-start-time (current-time)))
+
+(defun helm-hatena-bookmark-http-debug-finish (result process)
+  "Stop http debug mode.
+RESULT is boolean.
+PROCESS is a http-request process."
+  (if helm-hatena-bookmark-debug-mode
+      (message (format "[B!] %s to GET %s (%0.1fsec) at %s."
+		       (if result "Success" "Failure")
+		       (car (last (process-command process)))
+		       (helm-hatena-bookmark-time-subtract-to-seconds
+			(current-time) helm-hatena-bookmark-http-debug-start-time)
+		       (helm-hatena-bookmark-format-time-string (current-time))))))
+
+(defun helm-hatena-bookmark-filter-debug-start ()
+  "Start filter debug mode."
+  (setq helm-hatena-bookmark-filter-debug-start-time (current-time)))
+
+(defun helm-hatena-bookmark-filter-debug-finish (result)
+  "Stop filter debug mode.
+RESULT is boolean."
+  (if helm-hatena-bookmark-debug-mode
+      (message (format "[B!] %s to filter the http response (%dbytes, %0.1fsec) at %s."
+		       (if result "Success" "Failure")
+		       (- (point-max) (point-min))
+		       (helm-hatena-bookmark-time-subtract-to-seconds
+			(current-time) helm-hatena-bookmark-filter-debug-start-time)
+		       (helm-hatena-bookmark-format-time-string (current-time))))))
+
+
+;;; Timer
 
 (defun helm-hatena-bookmark-set-timer ()
   "Set timer."
@@ -230,6 +273,30 @@ Argument _EVENT is a string describing the type of event."
 
 (define-obsolete-function-alias 'helm-hatena-bookmark:initialize
   'helm-hatena-bookmark-initialize "2.2.0")
+
+(defun helm-hatena-bookmark-get-url ()
+  "Return Hatena::Bookmark URL or error if `helm-hatena-bookmark-username' is nil."
+  (unless helm-hatena-bookmark-username
+    (error "Variable `helm-hatena-bookmark-username' is nil"))
+  (format "http://b.hatena.ne.jp/%s/search.data"
+	  helm-hatena-bookmark-username))
+
+(defun helm-hatena-bookmark-find-curl-program ()
+  "Return an appropriate `curl' program pathname or error if not found."
+  (or
+   (executable-find "curl")
+   (error "Cannot find `curl' helm-hatena-bookmark.el requires")))
+
+(defun helm-hatena-bookmark-find-sed-program ()
+  "Return an appropriate `sed' program pathname or error if not found."
+  (executable-find
+   (cond
+    ((eq system-type 'darwin)
+     (unless (executable-find "gsed")
+       (error "Cannot find `gsed' helm-hatena-bookmark.el requires.  (example `$ brew install gnu-sed')"))
+     "gsed")
+    (t
+     "sed"))))
 
 (provide 'helm-hatena-bookmark)
 
