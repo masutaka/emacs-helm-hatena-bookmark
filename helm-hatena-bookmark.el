@@ -82,7 +82,8 @@ DO NOT SET VALUE MANUALLY.")
 DO NOT SET VALUE MANUALLY.")
 
 (defvar helm-hatena-bookmark-debug-mode nil)
-(defvar helm-hatena-bookmark-debug-start-time nil)
+(defvar helm-hatena-bookmark-http-debug-start-time nil)
+(defvar helm-hatena-bookmark-filter-debug-start-time nil)
 
 (defun helm-hatena-bookmark-load ()
   "Load `helm-hatena-bookmark-file'."
@@ -208,15 +209,14 @@ Argument PROCESS is a http-request process."
 (defun helm-hatena-bookmark-filter-http-response ()
   (let ((sed-args '("-n" "N; N; s/\\(.*\\)\\n\\(\\[.*\\]\\)\\?\\(.*\\)\\n\\(http.*\\)/\\2 \\1 [summary:\\3][href:\\4]/p"))
 	result)
+    (helm-hatena-bookmark-filter-debug-start)
     (delete-region (point-min) (+ (helm-hatena-bookmark-point-of-separator) 1))
     (apply 'call-process-region
 	   (point-min) (point-max)
 	   helm-hatena-bookmark-sed-program t '(t nil) nil
 	   sed-args)
     (setq result (> (point-max) (point-min)))
-    (if helm-hatena-bookmark-debug-mode
-	(message (format "[B!] write-region at %s, result:%s, point-min:%d, point-max:%d"
-			 (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)) result (point-min) (point-max))))
+    (helm-hatena-bookmark-filter-debug-finish result)
     result))
 
 (defun helm-hatena-bookmark-point-of-separator ()
@@ -226,11 +226,11 @@ Argument PROCESS is a http-request process."
     (re-search-forward "^?$" nil t)))
 
 (defun helm-hatena-bookmark-http-debug-start ()
-  "Start debug mode."
-  (setq helm-hatena-bookmark-debug-start-time (current-time)))
+  "Start http debug mode."
+  (setq helm-hatena-bookmark-http-debug-start-time (current-time)))
 
 (defun helm-hatena-bookmark-http-debug-finish (result process)
-  "Stop debug mode.
+  "Stop http debug mode.
 RESULT is boolean.
 PROCESS is a http-request process."
   (if helm-hatena-bookmark-debug-mode
@@ -239,7 +239,23 @@ PROCESS is a http-request process."
 		       (car (last (process-command process)))
 		       (time-to-seconds
 			(time-subtract (current-time)
-				       helm-hatena-bookmark-debug-start-time))
+				       helm-hatena-bookmark-http-debug-start-time))
+		       (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))))
+
+(defun helm-hatena-bookmark-filter-debug-start ()
+  "Start filter debug mode."
+  (setq helm-hatena-bookmark-filter-debug-start-time (current-time)))
+
+(defun helm-hatena-bookmark-filter-debug-finish (result)
+  "Stop filter debug mode.
+RESULT is boolean."
+  (if helm-hatena-bookmark-debug-mode
+      (message (format "[B!] %s to filter the http response (%dbytes, %0.1fsec) at %s."
+		       (if result "Success" "Failure")
+		       (- (point-max) (point-min))
+		       (time-to-seconds
+			(time-subtract (current-time)
+				       helm-hatena-bookmark-filter-debug-start-time))
 		       (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))))
 
 (defun helm-hatena-bookmark-set-timer ()
