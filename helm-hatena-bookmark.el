@@ -205,15 +205,7 @@ Argument PROCESS is a http-request process."
 	      (message (format "[B!] write-region at %s, result:%s, point-min:%d, point-max:%d"
 			       (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)) result (+ (helm-hatena-bookmark-point-of-separator) 1) (point-max))))
 	  (write-region (+ (helm-hatena-bookmark-point-of-separator) 1) (point-max) helm-hatena-bookmark-file))))
-    (if result (kill-buffer buffer-name))
-    (if helm-hatena-bookmark-debug-mode
-	(message (format "[B!] %s to create %s (%0.1fsec) at %s."
-			 (if result "Success" "Failure")
-			 helm-hatena-bookmark-file
-			 (time-to-seconds
-			  (time-subtract (current-time)
-					 helm-hatena-bookmark-debug-start-time))
-			 (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)))))))
+    (if result (kill-buffer buffer-name))))
 
 (defun helm-hatena-bookmark-valid-http-responsep ()
   "Return if the http response is valid."
