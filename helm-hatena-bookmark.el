@@ -159,21 +159,16 @@ Argument CANDIDATE a line string of a bookmark."
   "Receive a response of `helm-hatena-bookmark-http-request'.
 Argument PROCESS is a http-request process.
 Argument _EVENT is a string describing the type of event."
-  (ignore-errors
-    (helm-hatena-bookmark-handle-http-response process)))
-
-(defun helm-hatena-bookmark-handle-http-response (process)
-  "Handle a response of `helm-hatena-bookmark-http-request'.
-Argument PROCESS is a http-request process."
   (let ((buffer-name helm-hatena-bookmark-http-buffer-name))
-    (unwind-protect
-	(with-current-buffer (get-buffer buffer-name)
-	  (unless (helm-hatena-bookmark-valid-http-responsep process)
-	    (error "Invalid http response"))
-	  (unless (helm-hatena-bookmark-filter-http-response)
-	    (error "Fail to filter http response"))
-	  (write-region (point-min) (point-max) helm-hatena-bookmark-file))
-      (kill-buffer buffer-name))))
+    (ignore-errors
+      (unwind-protect
+	  (with-current-buffer (get-buffer buffer-name)
+	    (unless (helm-hatena-bookmark-valid-http-responsep process)
+	      (error "Invalid http response"))
+	    (unless (helm-hatena-bookmark-filter-http-response)
+	      (error "Fail to filter http response"))
+	    (write-region (point-min) (point-max) helm-hatena-bookmark-file))
+	(kill-buffer buffer-name)))))
 
 (defun helm-hatena-bookmark-valid-http-responsep (process)
   "Return if the http response is valid.
