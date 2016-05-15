@@ -222,6 +222,12 @@ Argument PROCESS is a http-request process."
     (goto-char (point-min))
     (re-search-forward "^?$" nil t)))
 
+(defsubst helm-hatena-bookmark-time-subtract-to-seconds (before after)
+  (time-to-seconds (time-subtract before after)))
+
+(defsubst helm-hatena-bookmark-format-time-string (time)
+  (format-time-string "%Y-%m-%d %H:%M:%S" time))
+
 (defun helm-hatena-bookmark-http-debug-start ()
   "Start http debug mode."
   (setq helm-hatena-bookmark-http-debug-start-time (current-time)))
@@ -234,10 +240,9 @@ PROCESS is a http-request process."
       (message (format "[B!] %s to GET %s (%0.1fsec) at %s."
 		       (if result "Success" "Failure")
 		       (car (last (process-command process)))
-		       (time-to-seconds
-			(time-subtract (current-time)
-				       helm-hatena-bookmark-http-debug-start-time))
-		       (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))))
+		       (helm-hatena-bookmark-time-subtract-to-seconds
+			(current-time) helm-hatena-bookmark-http-debug-start-time)
+		       (helm-hatena-bookmark-format-time-string (current-time))))))
 
 (defun helm-hatena-bookmark-filter-debug-start ()
   "Start filter debug mode."
@@ -250,10 +255,9 @@ RESULT is boolean."
       (message (format "[B!] %s to filter the http response (%dbytes, %0.1fsec) at %s."
 		       (if result "Success" "Failure")
 		       (- (point-max) (point-min))
-		       (time-to-seconds
-			(time-subtract (current-time)
-				       helm-hatena-bookmark-filter-debug-start-time))
-		       (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))))
+		       (helm-hatena-bookmark-time-subtract-to-seconds
+			(current-time) helm-hatena-bookmark-filter-debug-start-time)
+		       (helm-hatena-bookmark-format-time-string (current-time))))))
 
 (defun helm-hatena-bookmark-set-timer ()
   "Set timer."
