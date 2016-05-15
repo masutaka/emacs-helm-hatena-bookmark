@@ -140,7 +140,7 @@ Argument CANDIDATE a line string of a bookmark."
     (helm :sources helm-hatena-bookmark-source
 	  :prompt "Find Bookmark: ")))
 
-;;; Process
+;;; Process handler
 
 (defun helm-hatena-bookmark-http-request ()
   "Make a new HTTP request for create `helm-hatena-bookmark-file'."
@@ -156,7 +156,7 @@ Argument CANDIDATE a line string of a bookmark."
     (set-process-sentinel proc 'helm-hatena-bookmark-http-request-sentinel)))
 
 (defun helm-hatena-bookmark-http-request-sentinel (process _event)
-  "Receive a response of `helm-hatena-bookmark-http-request'.
+  "Handle a response of `helm-hatena-bookmark-http-request'.
 Argument PROCESS is a http-request process.
 Argument _EVENT is a string describing the type of event."
   (let ((buffer-name helm-hatena-bookmark-http-buffer-name))
@@ -243,7 +243,6 @@ RESULT is boolean."
 		       (helm-hatena-bookmark-time-subtract-to-seconds
 			(current-time) helm-hatena-bookmark-filter-debug-start-time)
 		       (helm-hatena-bookmark-format-time-string (current-time))))))
-
 
 ;;; Timer
 
