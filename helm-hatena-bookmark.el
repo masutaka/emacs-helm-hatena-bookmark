@@ -60,6 +60,8 @@
 (define-obsolete-variable-alias 'helm-hatena-bookmark:interval
   'helm-hatena-bookmark-interval "2.2.0")
 
+;;; Internal Variables
+
 (defvar helm-hatena-bookmark-url nil
   "Cache a result of `helm-hatena-bookmark-get-url'.
 DO NOT SET VALUE MANUALLY.")
@@ -84,6 +86,8 @@ DO NOT SET VALUE MANUALLY.")
 (defvar helm-hatena-bookmark-debug-mode nil)
 (defvar helm-hatena-bookmark-http-debug-start-time nil)
 (defvar helm-hatena-bookmark-filter-debug-start-time nil)
+
+;;; Helm source
 
 (defun helm-hatena-bookmark-load ()
   "Load `helm-hatena-bookmark-file'."
@@ -136,29 +140,7 @@ Argument CANDIDATE a line string of a bookmark."
     (helm :sources helm-hatena-bookmark-source
 	  :prompt "Find Bookmark: ")))
 
-(defun helm-hatena-bookmark-find-curl-program ()
-  "Return an appropriate `curl' program pathname or error if not found."
-  (or
-   (executable-find "curl")
-   (error "Cannot find `curl' helm-hatena-bookmark.el requires")))
-
-(defun helm-hatena-bookmark-find-sed-program ()
-  "Return an appropriate `sed' program pathname or error if not found."
-  (executable-find
-   (cond
-    ((eq system-type 'darwin)
-     (unless (executable-find "gsed")
-       (error "Cannot find `gsed' helm-hatena-bookmark.el requires.  (example `$ brew install gnu-sed')"))
-     "gsed")
-    (t
-     "sed"))))
-
-(defun helm-hatena-bookmark-get-url ()
-  "Return Hatena::Bookmark URL or error if `helm-hatena-bookmark-username' is nil."
-  (unless helm-hatena-bookmark-username
-    (error "Variable `helm-hatena-bookmark-username' is nil"))
-  (format "http://b.hatena.ne.jp/%s/search.data"
-	  helm-hatena-bookmark-username))
+;;; Process
 
 (defun helm-hatena-bookmark-http-request ()
   "Make a new HTTP request for create `helm-hatena-bookmark-file'."
@@ -222,6 +204,8 @@ Argument PROCESS is a http-request process."
     (goto-char (point-min))
     (re-search-forward "^?$" nil t)))
 
+;;; Debug
+
 (defsubst helm-hatena-bookmark-time-subtract-to-seconds (before after)
   (time-to-seconds (time-subtract before after)))
 
@@ -259,6 +243,9 @@ RESULT is boolean."
 			(current-time) helm-hatena-bookmark-filter-debug-start-time)
 		       (helm-hatena-bookmark-format-time-string (current-time))))))
 
+
+;;; Timer
+
 (defun helm-hatena-bookmark-set-timer ()
   "Set timer."
   (setq helm-hatena-bookmark-timer
@@ -285,6 +272,30 @@ RESULT is boolean."
 
 (define-obsolete-function-alias 'helm-hatena-bookmark:initialize
   'helm-hatena-bookmark-initialize "2.2.0")
+
+(defun helm-hatena-bookmark-get-url ()
+  "Return Hatena::Bookmark URL or error if `helm-hatena-bookmark-username' is nil."
+  (unless helm-hatena-bookmark-username
+    (error "Variable `helm-hatena-bookmark-username' is nil"))
+  (format "http://b.hatena.ne.jp/%s/search.data"
+	  helm-hatena-bookmark-username))
+
+(defun helm-hatena-bookmark-find-curl-program ()
+  "Return an appropriate `curl' program pathname or error if not found."
+  (or
+   (executable-find "curl")
+   (error "Cannot find `curl' helm-hatena-bookmark.el requires")))
+
+(defun helm-hatena-bookmark-find-sed-program ()
+  "Return an appropriate `sed' program pathname or error if not found."
+  (executable-find
+   (cond
+    ((eq system-type 'darwin)
+     (unless (executable-find "gsed")
+       (error "Cannot find `gsed' helm-hatena-bookmark.el requires.  (example `$ brew install gnu-sed')"))
+     "gsed")
+    (t
+     "sed"))))
 
 (provide 'helm-hatena-bookmark)
 
