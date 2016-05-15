@@ -176,7 +176,9 @@ Argument PROCESS is a http-request process."
       (kill-buffer buffer-name))))
 
 (defun helm-hatena-bookmark-valid-http-responsep (process)
-  "Return if the http response is valid."
+  "Return if the http response is valid.
+Argument PROCESS is a http-request process.
+Should to call in `helm-hatena-bookmark-http-buffer-name'."
   (save-excursion
     (let ((result))
       (goto-char (point-min))
@@ -186,6 +188,7 @@ Argument PROCESS is a http-request process."
       result)))
 
 (defun helm-hatena-bookmark-filter-http-response ()
+  "Filter a response of `helm-hatena-bookmark-http-request'."
   (let ((sed-args '("-n" "N; N; s/\\(.*\\)\\n\\(\\[.*\\]\\)\\?\\(.*\\)\\n\\(http.*\\)/\\2 \\1 [summary:\\3][href:\\4]/p"))
 	result)
     (helm-hatena-bookmark-filter-debug-start)
@@ -206,10 +209,13 @@ Argument PROCESS is a http-request process."
 
 ;;; Debug
 
-(defsubst helm-hatena-bookmark-time-subtract-to-seconds (before after)
-  (time-to-seconds (time-subtract before after)))
+(defsubst helm-hatena-bookmark-time-subtract-to-seconds (t1 t2)
+  "Subtract two time values, T1 minus T2.
+Return the seconds format."
+  (time-to-seconds (time-subtract t1 t2)))
 
 (defsubst helm-hatena-bookmark-format-time-string (time)
+  "Return time string of TIME with fixed format."
   (format-time-string "%Y-%m-%d %H:%M:%S" time))
 
 (defun helm-hatena-bookmark-http-debug-start ()
