@@ -4,7 +4,7 @@
 
 ;; Author: Takashi Masuda <masutaka.net@gmail.com>
 ;; URL: https://github.com/masutaka/emacs-helm-hatena-bookmark
-;; Version: 2.2.0
+;; Version: 2.2.1
 ;; Package-Requires: ((helm "1.9.5"))
 
 ;; This program is free software: you can redistribute it and/or modify
