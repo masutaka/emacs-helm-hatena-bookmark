@@ -1,10 +1,10 @@
 ;;; helm-hatena-bookmark.el --- Hatena::Bookmark with helm interface -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2015 by Takashi Masuda
+;; Copyright (C) 2016 by Takashi Masuda
 
 ;; Author: Takashi Masuda <masutaka.net@gmail.com>
 ;; URL: https://github.com/masutaka/emacs-helm-hatena-bookmark
-;; Version: 2.2.1
+;; Version: 2.2.2
 ;; Package-Requires: ((helm "1.9.5"))
 
 ;; This program is free software: you can redistribute it and/or modify
