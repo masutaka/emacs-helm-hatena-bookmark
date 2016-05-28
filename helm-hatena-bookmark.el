@@ -144,14 +144,15 @@ Argument CANDIDATE a line string of a bookmark."
 
 (defun helm-hatena-bookmark-http-request ()
   "Make a new HTTP request for create `helm-hatena-bookmark-file'."
-  (let ((proc-name "helm-hatena-bookmark")
+  (let ((buffer-name helm-hatena-bookmark-http-buffer-name)
+	(proc-name "helm-hatena-bookmark")
 	(curl-args `("--include" "--compressed" ,helm-hatena-bookmark-url))
 	proc)
-    (unless (get-buffer-process helm-hatena-bookmark-http-buffer-name)
+    (unless (get-buffer-process buffer-name)
       (helm-hatena-bookmark-http-debug-start)
       (setq proc (apply 'start-process
 			proc-name
-			helm-hatena-bookmark-http-buffer-name
+			buffer-name
 			helm-hatena-bookmark-curl-program
 			curl-args))
       (set-process-sentinel proc 'helm-hatena-bookmark-http-request-sentinel))))
