@@ -1,4 +1,12 @@
-# helm-hatena-bookmark.el [![melpa badge][melpa-badge]][melpa-link] [![melpa stable badge][melpa-stable-badge]][melpa-stable-link]
+# helm-hatena-bookmark.el
+
+[![melpa badge][melpa-badge]][melpa-link]
+[![melpa stable badge][melpa-stable-badge]][melpa-stable-link]
+
+[melpa-link]: https://melpa.org/#/helm-hatena-bookmark
+[melpa-stable-link]: https://stable.melpa.org/#/helm-hatena-bookmark
+[melpa-badge]: https://melpa.org/packages/helm-hatena-bookmark-badge.svg
+[melpa-stable-badge]: https://stable.melpa.org/packages/helm-hatena-bookmark-badge.svg
 
 ## Introduction
 
@@ -17,7 +25,7 @@
 
 ## Installation
 
-You can install `helm-hatena-bookmark.el` from [MELPA](https://github.com/milkypostman/melpa.git) with package.el (`M-x package-install helm-hatena-bookmark`).
+You can install `helm-hatena-bookmark.el` from [MELPA](https://melpa.org) with package.el (`M-x package-install helm-hatena-bookmark`).
 
 ## Setup
 
@@ -41,8 +49,3 @@ You can install `helm-hatena-bookmark.el` from [MELPA](https://github.com/milkyp
 Thanks to k1LoW who is Author of anything-hatena-bookmark.el
 
 https://github.com/k1LoW/anything-hatena-bookmark
-
-[melpa-link]: http://melpa.org/#/helm-hatena-bookmark
-[melpa-stable-link]: http://stable.melpa.org/#/helm-hatena-bookmark
-[melpa-badge]: http://melpa.org/packages/helm-hatena-bookmark-badge.svg
-[melpa-stable-badge]: http://stable.melpa.org/packages/helm-hatena-bookmark-badge.svg
