@@ -19,7 +19,7 @@
 ## Requirements
 
 * Emacs 24.5 or higher
-* helm 1.9.5 or higher
+* helm 2.8.2 or higher
 * curl
 * GNU sed
 
