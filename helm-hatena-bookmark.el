@@ -91,9 +91,12 @@ DO NOT SET VALUE MANUALLY.")
 
 (defun helm-hatena-bookmark-load ()
   "Load `helm-hatena-bookmark-file'."
-  (with-current-buffer (helm-candidate-buffer 'global)
-    (let ((coding-system-for-read 'utf-8))
-      (insert-file-contents helm-hatena-bookmark-file))))
+  (if (file-exists-p helm-hatena-bookmark-file)
+      (with-current-buffer (helm-candidate-buffer 'global)
+	(let ((coding-system-for-read 'utf-8))
+	  (insert-file-contents helm-hatena-bookmark-file)))
+    (message "%s not found. Please wait up to %d minutes."
+	       helm-hatena-bookmark-file (/ helm-hatena-bookmark-interval 60))))
 
 (defvar helm-hatena-bookmark-action
   '(("Browse URL" . helm-hatena-bookmark-browse-url)
@@ -135,10 +138,11 @@ Argument CANDIDATE a line string of a bookmark."
   "Search Hatena::Bookmark using `helm'."
   (interactive)
   (let ((helm-full-frame helm-hatena-bookmark-full-frame))
-    (unless (file-exists-p helm-hatena-bookmark-file)
-      (error (format "%s not found" helm-hatena-bookmark-file)))
-    (helm :sources helm-hatena-bookmark-source
-	  :prompt "Find Bookmark: ")))
+    (if (file-exists-p helm-hatena-bookmark-file)
+	(helm :sources helm-hatena-bookmark-source
+	      :prompt "Find Bookmark: ")
+      (message "%s not found. Please wait up to %d minutes."
+	       helm-hatena-bookmark-file (/ helm-hatena-bookmark-interval 60)))))
 
 ;;; Process handler
 
