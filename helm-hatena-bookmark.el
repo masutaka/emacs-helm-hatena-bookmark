@@ -41,7 +41,8 @@
 (define-obsolete-variable-alias 'helm-hatena-bookmark:username
   'helm-hatena-bookmark-username "2.2.0")
 
-(defcustom helm-hatena-bookmark-file "~/.hatenabookmark"
+(defcustom helm-hatena-bookmark-file
+  (expand-file-name "helm-hatena-bookmark" user-emacs-directory)
   "A cache file of your Hatena::Bookmark."
   :type '(choice (const nil)
 		 string)
