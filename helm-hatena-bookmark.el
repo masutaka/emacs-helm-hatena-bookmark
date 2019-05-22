@@ -48,7 +48,7 @@
 		 string)
   :group 'helm-hatena-bookmark)
 
-(defcustom helm-hatena-bookmark-candidate-number-limit 10000
+(defcustom helm-hatena-bookmark-candidate-number-limit 100
   "Candidate number limit."
   :type 'integer
   :group 'helm-hatena-bookmark)
