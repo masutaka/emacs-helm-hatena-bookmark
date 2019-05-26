@@ -75,7 +75,7 @@ DO NOT SET VALUE MANUALLY.")
   "Cache a result of `helm-hatena-bookmark-find-sed-program'.
 DO NOT SET VALUE MANUALLY.")
 
-(defvar helm-hatena-bookmark-http-buffer-name " *helm-hatena-bookmark*"
+(defconst helm-hatena-bookmark-http-buffer-name " *helm-hatena-bookmark*"
   "Working buffer name of `helm-hatena-bookmark-http-request'.")
 
 (defvar helm-hatena-bookmark-full-frame helm-full-frame)
@@ -233,12 +233,12 @@ Return the seconds format."
 RESULT is boolean.
 PROCESS is a http-request process."
   (if helm-hatena-bookmark-debug-mode
-      (message (format "[B!] %s to GET %s (%0.1fsec) at %s."
-		       (if result "Success" "Failure")
-		       (car (last (process-command process)))
-		       (helm-hatena-bookmark-time-subtract-to-seconds
-			(current-time) helm-hatena-bookmark-http-debug-start-time)
-		       (helm-hatena-bookmark-format-time-string (current-time))))))
+      (message "[B!] %s to GET %s (%0.1fsec) at %s."
+	       (if result "Success" "Failure")
+	       (car (last (process-command process)))
+	       (helm-hatena-bookmark-time-subtract-to-seconds
+		(current-time) helm-hatena-bookmark-http-debug-start-time)
+	       (helm-hatena-bookmark-format-time-string (current-time)))))
 
 (defun helm-hatena-bookmark-filter-debug-start ()
   "Start filter debug mode."
@@ -248,12 +248,12 @@ PROCESS is a http-request process."
   "Stop filter debug mode.
 RESULT is boolean."
   (if helm-hatena-bookmark-debug-mode
-      (message (format "[B!] %s to filter the http response (%dbytes, %0.1fsec) at %s."
-		       (if result "Success" "Failure")
-		       (- (point-max) (point-min))
-		       (helm-hatena-bookmark-time-subtract-to-seconds
-			(current-time) helm-hatena-bookmark-filter-debug-start-time)
-		       (helm-hatena-bookmark-format-time-string (current-time))))))
+      (message "[B!] %s to filter the http response (%dbytes, %0.1fsec) at %s."
+	       (if result "Success" "Failure")
+	       (- (point-max) (point-min))
+	       (helm-hatena-bookmark-time-subtract-to-seconds
+		(current-time) helm-hatena-bookmark-filter-debug-start-time)
+	       (helm-hatena-bookmark-format-time-string (current-time)))))
 
 ;;; Timer
 
