@@ -91,6 +91,7 @@ DO NOT SET VALUE MANUALLY.")
 ;;; Macro
 
 (defmacro helm-hatena-bookmark-file-check (&rest body)
+  "The BODY is evaluated only when `helm-hatena-bookmark-file' exists."
   `(if (file-exists-p helm-hatena-bookmark-file)
        ,@body
      (message "%s not found. Please wait up to %d minutes."
