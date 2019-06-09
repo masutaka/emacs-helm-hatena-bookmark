@@ -190,7 +190,7 @@ Should to call in `helm-hatena-bookmark-http-buffer-name'."
     (let ((result))
       (goto-char (point-min))
       (setq result (re-search-forward
-		    (concat "^" (regexp-quote "HTTP/1.1 200 OK")) (point-at-eol) t))
+		    (concat "^" (regexp-quote "HTTP/2 200")) (point-at-eol) t))
       (helm-hatena-bookmark-http-debug-finish result process)
       result)))
 
@@ -289,7 +289,7 @@ RESULT is boolean."
   "Return Hatena::Bookmark URL or error if `helm-hatena-bookmark-username' is nil."
   (unless helm-hatena-bookmark-username
     (error "Variable `helm-hatena-bookmark-username' is nil"))
-  (format "http://b.hatena.ne.jp/%s/search.data"
+  (format "https://b.hatena.ne.jp/%s/search.data"
 	  helm-hatena-bookmark-username))
 
 (defun helm-hatena-bookmark-find-curl-program ()
