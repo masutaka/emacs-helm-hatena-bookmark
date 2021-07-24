@@ -32,14 +32,14 @@
   :prefix "helm-hatena-bookmark-"
   :group 'helm)
 
+(define-obsolete-variable-alias 'helm-hatena-bookmark:username
+  'helm-hatena-bookmark-username "2.2.0")
+
 (defcustom helm-hatena-bookmark-username nil
   "A username of your Hatena account."
   :type '(choice (const nil)
 		 string)
   :group 'helm-hatena-bookmark)
-
-(define-obsolete-variable-alias 'helm-hatena-bookmark:username
-  'helm-hatena-bookmark-username "2.2.0")
 
 (defcustom helm-hatena-bookmark-file
   (expand-file-name "helm-hatena-bookmark" user-emacs-directory)
@@ -53,13 +53,13 @@
   :type 'integer
   :group 'helm-hatena-bookmark)
 
+(define-obsolete-variable-alias 'helm-hatena-bookmark:interval
+  'helm-hatena-bookmark-interval "2.2.0")
+
 (defcustom helm-hatena-bookmark-interval (* 1 60 60)
   "Number of seconds to call `helm-hatena-bookmark-http-request'."
   :type 'integer
   :group 'helm-hatena-bookmark)
-
-(define-obsolete-variable-alias 'helm-hatena-bookmark:interval
-  'helm-hatena-bookmark-interval "2.2.0")
 
 ;;; Internal Variables
 
@@ -129,6 +129,9 @@ Argument CANDIDATE a line string of a bookmark."
   (string-match "\\[summary:\\(.+\\)\\]\\[" candidate)
   (message (match-string 1 candidate)))
 
+(define-obsolete-variable-alias 'helm-hatena-bookmark:source
+  'helm-hatena-bookmark-source "2.2.0")
+
 (defvar helm-hatena-bookmark-source
   (helm-build-in-buffer-source "Hatena:Bookmark"
     :init 'helm-hatena-bookmark-load
@@ -137,9 +140,6 @@ Argument CANDIDATE a line string of a bookmark."
     :multiline t
     :migemo t)
   "Helm source for Hatena::Bookmark.")
-
-(define-obsolete-variable-alias 'helm-hatena-bookmark:source
-  'helm-hatena-bookmark-source "2.2.0")
 
 ;;;###autoload
 (defun helm-hatena-bookmark ()
