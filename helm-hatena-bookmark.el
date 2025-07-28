@@ -223,7 +223,7 @@ Return the seconds format."
 
 (defsubst helm-hatena-bookmark-format-time-string (time)
   "Return time string of TIME with fixed format."
-  (format-time-string "%Y-%m-%d %H:%M:%S" time))
+  (format-time-string "%F %T" time))
 
 (defun helm-hatena-bookmark-http-debug-start ()
   "Start http debug mode."
