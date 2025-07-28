@@ -216,14 +216,13 @@ Should to call in `helm-hatena-bookmark-http-buffer-name'."
 
 ;;; Debug
 
-(defsubst helm-hatena-bookmark-time-subtract-to-seconds (t1 t2)
-  "Subtract two time values, T1 minus T2.
-Return the seconds format."
-  (time-to-seconds (time-subtract t1 t2)))
+(defsubst helm-hatena-bookmark-elapsed-seconds (time)
+  "Calculate elapsed seconds since TIME."
+  (time-to-seconds (time-subtract (current-time) time)))
 
-(defsubst helm-hatena-bookmark-format-time-string (time)
-  "Return time string of TIME with fixed format."
-  (format-time-string "%F %T" time))
+(defsubst helm-hatena-bookmark-format-current-time ()
+  "Format current time as \"YYYY-MM-DD HH:MM:SS\" string."
+  (format-time-string "%F %T"))
 
 (defun helm-hatena-bookmark-http-debug-start ()
   "Start http debug mode."
@@ -237,9 +236,8 @@ PROCESS is a http-request process."
       (message "[B!] %s to GET %s (%0.1fsec) at %s."
 	       (if result "Success" "Failure")
 	       (car (last (process-command process)))
-	       (helm-hatena-bookmark-time-subtract-to-seconds
-		(current-time) helm-hatena-bookmark-http-debug-start-time)
-	       (helm-hatena-bookmark-format-time-string (current-time)))))
+	       (helm-hatena-bookmark-elapsed-seconds helm-hatena-bookmark-http-debug-start-time)
+	       (helm-hatena-bookmark-format-current-time))))
 
 (defun helm-hatena-bookmark-filter-debug-start ()
   "Start filter debug mode."
@@ -252,9 +250,8 @@ RESULT is boolean."
       (message "[B!] %s to filter the http response (%dbytes, %0.1fsec) at %s."
 	       (if result "Success" "Failure")
 	       (- (point-max) (point-min))
-	       (helm-hatena-bookmark-time-subtract-to-seconds
-		(current-time) helm-hatena-bookmark-filter-debug-start-time)
-	       (helm-hatena-bookmark-format-time-string (current-time)))))
+	       (helm-hatena-bookmark-elapsed-seconds helm-hatena-bookmark-filter-debug-start-time)
+	       (helm-hatena-bookmark-format-current-time))))
 
 ;;; Timer
 
