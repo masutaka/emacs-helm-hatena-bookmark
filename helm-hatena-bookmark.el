@@ -1,4 +1,4 @@
-;;; helm-hatena-bookmark.el --- Hatena::Bookmark with helm interface -*- lexical-binding: t; -*-
+;;; helm-hatena-bookmark.el --- Helm interface for Hatena::Bookmark -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016 by Takashi Masuda
 
@@ -21,14 +21,14 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; helm-hatena-bookmark.el provides a helm interface to Hatena::Bookmark.
+;; helm-hatena-bookmark.el provides a helm interface for Hatena::Bookmark.
 
 ;;; Code:
 
 (require 'helm)
 
 (defgroup helm-hatena-bookmark nil
-  "Hatena::Bookmark with helm interface"
+  "Helm interface for Hatena::Bookmark"
   :prefix "helm-hatena-bookmark-"
   :group 'helm)
 
