@@ -2,11 +2,14 @@
 
 [![melpa badge][melpa-badge]][melpa-link]
 [![melpa stable badge][melpa-stable-badge]][melpa-stable-link]
+[![Ask DeepWiki][deepwiki-badge]][deepwiki-link]
 
 [melpa-link]: https://melpa.org/#/helm-hatena-bookmark
 [melpa-stable-link]: https://stable.melpa.org/#/helm-hatena-bookmark
+[deepwiki-link]: https://deepwiki.com/masutaka/emacs-helm-hatena-bookmark
 [melpa-badge]: https://melpa.org/packages/helm-hatena-bookmark-badge.svg
 [melpa-stable-badge]: https://stable.melpa.org/packages/helm-hatena-bookmark-badge.svg
+[deepwiki-badge]: https://deepwiki.com/badge.svg
 
 ## Introduction
 
